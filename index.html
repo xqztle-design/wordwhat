@@ -207,6 +207,81 @@
   .fade-in{ animation: fadein .36s ease both; }
   @keyframes fadein{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
 
+  /* ===== Mobile polish (add to end of existing <style>) ===== */
+
+  /* เพิ่มความหนาและระยะให้ปุ่ม ช่องกรอก และ word box บนหน้าจอเล็ก */
+  @media (max-width:520px) {
+    body { padding:12px; }
+
+    .card { padding:14px; border-radius:12px; box-shadow: 0 10px 30px rgba(2,6,23,0.55); }
+
+    header{ gap:10px; }
+    .logo .badge{ width:44px; height:44px; font-size:15px; }
+    header h1{ font-size:17px; line-height:1.05; }
+
+    /* ให้ grid แปลงเป็น 2 คอลัมน์หรือ 1 คอลัมน์ตามพื้นที่ */
+    .grid { grid-template-columns: repeat(2, 1fr); gap:8px; }
+
+    .category { padding:10px; min-height:72px; border-radius:10px; }
+    .category .cat-icon { width:40px; height:40px; border-radius:8px; }
+
+    /* ขนาดคำและกล่องคำที่เหมาะกับมือถือ */
+    .word-box { font-size:26px; letter-spacing:6px; padding:12px; min-height:64px; }
+
+    /* input และปุ่มให้เต็มความกว้าง และจัดเป็นคอลัมน์ */
+    .hint-row { flex-direction: column; align-items: stretch; gap:10px; }
+    .hint-row > div[style*="flex:1"] { display:flex; gap:8px; }
+    input[type="text"] { font-size:16px; padding:12px; border-radius:10px; }
+    .hint-row .btn { padding:12px 10px; font-size:15px; border-radius:10px; }
+
+    /* ย้ายปุ่มคำใบ้และยอมแพ้ให้อยู่ใต้ช่องกรอกในแถวเดียวกันที่พอดี */
+    .hint-row > div[style*="display:flex"] { flex-direction: row; }
+    .hint-row > div[style*="display:flex"] .btn { flex: 1; min-width:0; }
+
+    /* เพิ่มระยะและขนาดแถบสถานะให้สัมผัสง่าย */
+    .status { padding:10px; border-radius:10px; }
+    .progress { height:10px; }
+
+    /* ปรับปุ่มบนแถบล่าง (desktop action) ให้ซ่อน เพราะทำให้เกะกะบนมือถือ */
+    .center .btn#tryAgain,
+    .center .btn.ghost#goHome { display:none; }
+
+    /* ขยายปุ่มที่มี id=submitGuess ให้เต็มความกว้างเมื่ออยู่บนมือถือ */
+    #submitGuess {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* ทำให้ปุ่มคำใบ้และยอมแพ้อยู่ใต้ช่องกรอกและขยายพอดี */
+    #hintLetterBtn, #giveUp {
+      width: 48%;
+      box-sizing: border-box;
+    }
+    /* แรปปุ่มสองปุ่มด้านข้างช่องหา ให้จัดเป็นแถวเดียวกัน */
+    .hint-row > div[style*="display:flex; gap:8px;"] {
+      justify-content: space-between;
+      gap:8px;
+    }
+
+    /* เพิ่ม margin ผลลัพธ์ให้ไม่ถูกปุ่มด้านล่าง */
+    #resultBox { margin-bottom: 10px; padding:12px; }
+
+    /* ปรับขนาดตัวอักษร meta / small ให้เหมาะกับมือถือ */
+    .meta, .small, .muted-note { font-size:12px; }
+
+    /* เพิ่ม subtle focus/active style เพื่อความชัดเมื่อกดบนมือถือ */
+    .btn:active, .btn.ghost:active {
+      transform: translateY(-2px) scale(.998);
+      box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+    }
+  }
+
+  /* ===== Optional: reduce grid to 1 column on very narrow phones ===== */
+  @media (max-width:360px) {
+    .grid { grid-template-columns: 1fr; }
+    #hintLetterBtn, #giveUp { width: 100%; }
+  }
+
 </style>
 </head>
 <body>
@@ -293,7 +368,7 @@
   </div>
 
 <script>
-/* ====== ข้อมูลหมวดและคำศัพท์ (เพิ่ม 3 หมวดใหม่แต่ละหมวด 30 คำ) ====== */
+/* ====== ข้อมูลหมวดและคำศัพท์ (เหมือนเดิม) ====== */
 const CATEGORIES = {
   สัตว์: [
     "ช้าง","ม้า","หมา","แมว","กระต่าย","นก","ปลา","เต่า","วัว","แกะ",
@@ -319,27 +394,6 @@ const CATEGORIES = {
     "รถยนต์","มอเตอร์ไซค์","จักรยาน","รถบัส","รถตู้","รถไฟ","เครื่องบิน","เรือ","แท็กซี่","แท็กซี่",
     "รถบรรทุก","รถปิกอัพ","รถไฟฟ้า","รถไฟใต้ดิน","เฮลิคอปเตอร์","เรือด่วน","เรือเฟอร์รี่","เรือเร็ว","รถแทรกเตอร์","สกู๊ตเตอร์",
     "รถไฟชานเมือง","รถไฟความเร็วสูง","รถม้า","รถราง","รถตัก","รถยก","เจ็ตสกี","เรือตรวจการณ์","รถพยาบาล","รถดับเพลิง"
-  ],
-
-  /* หมวดใหม่ 1: เครื่องใช้ไฟฟ้า */
-  "เครื่องใช้ไฟฟ้า": [
-    "โทรทัศน์","ตู้เย็น","ไมโครเวฟ","พัดลม","เครื่องปรับอากาศ","เครื่องซักผ้า","เตารีด","เครื่องดูดฝุ่น","โฮมเธียเตอร์","เครื่องทำน้ำอุ่น",
-    "หม้อหุงข้าว","กาต้มน้ำ","เตาไฟฟ้า","เตาไมโครเวฟ","เตาแก๊ส","เครื่องปั่น","เครื่องบด","คอมพิวเตอร์","โน้ตบุ๊ก","แท็บเล็ต",
-    "ลำโพง","หูฟัง","กล้องถ่ายรูป","เครื่องชงกาแฟ","เครื่องฟอกอากาศ","เครื่องเล่นดีวีดี","เราต์เตอร์","เครื่องบันทึกเสียง","เครื่องวัดอุณหภูมิ","เครื่องชาร์จ"
-  ],
-
-  /* หมวดใหม่ 2: เครื่องแต่งกาย */
-  "เครื่องแต่งกาย": [
-    "เสื้อยืด","กางเกงยีนส์","กระโปรง","เดรส","สูท","เน็คไท","เสื้อเชิ้ต","แจ็กเก็ต","เสื้อกันหนาว","เสื้อโค้ท",
-    "รองเท้า","รองเท้าผ้าใบ","รองเท้าหนัง","รองเท้าแตะ","ถุงเท้า","หมวก","ผ้าพันคอ","ถุงมือ","ชุดชั้นใน","บิกินี่",
-    "แจ็คเก็ตหนัง","เสื้อกล้าม","เสื้อโปโล","ชุดกีฬา","เอี๊ยม","เข็มขัด","กระเป๋าถือ","กระเป๋าสะพาย","แว่นตากันแดด","นาฬิกา"
-  ],
-
-  /* หมวดใหม่ 3: อาชีพ */
-  "อาชีพ": [
-    "แพทย์","พยาบาล","หมอเทคนิค","ครู","อาจารย์","วิศวกร","นักออกแบบ","นักบัญชี","นักข่าว","นักเขียน",
-    "โปรแกรมเมอร์","นักกฎหมาย","ทนายความ","นักสังคมสงเคราะห์","ช่างไม้","ช่างไฟฟ้า","ช่างประปา","ช่างยนต์","เชฟ","พ่อค้าขายของ",
-    "นักการตลาด","นักวิจัย","นักแปล","นักดนตรี","นักแสดง","นักกีฬา","ตำรวจ","ทหาร","พนักงานธนาคาร","นักบิน"
   ]
 };
 
