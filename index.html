@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>เกมทายคำศัพท์ Word What</title>
+
+<!-- Google font (fallback to system) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg1: #071026;
+    --bg2: #052033;
+    --card: rgba(255,255,255,0.03);
+    --glass: rgba(255,255,255,0.04);
+    --accent: linear-gradient(90deg,#06b6d4,#60a5fa);
+    --accent-solid: #06b6d4;
+    --muted: #94a3b8;
+    --text: #e6eef6;
+    --success: #16a34a;
+    --danger: #ef4444;
+    --glass-border: rgba(255,255,255,0.06);
+    font-family: "Inter", "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  }
+
+  /* reset */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html,body { height: 100%; }
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(6,182,212,0.06), transparent),
+                linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%);
+    color: var(--text);
+    padding: 28px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .wrap{ width:100%; max-width:1000px; margin: 8px; }
+
+  /* card */
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:16px;
+    padding:28px;
+    box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+    border: 1px solid rgba(255,255,255,0.02);
+    overflow: hidden;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px;
+  }
+
+  .logo{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+
+  .logo .badge{
+    width:52px; height:52px; border-radius:12px;
+    background: linear-gradient(135deg,#06b6d4,#647eff);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 6px 18px rgba(99,102,241,0.12);
+    font-weight:700; color:#012028;
+    font-size:18px;
+  }
+
+  header h1{
+    font-size:20px;
+    font-weight:700;
+    color: transparent;
+    background: linear-gradient(90deg,#a7f3d0, #60a5fa);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  header p.lead{ margin:0; color:var(--muted); font-size:13px; }
+
+  /* home / controls */
+  .center{ display:flex; align-items:center; justify-content:center; flex-direction:column; }
+
+  .btn{
+    appearance:none; border:0; padding:12px 18px; border-radius:12px;
+    background: linear-gradient(90deg,#06b6d4,#60a5fa); color:#012028;
+    font-weight:700; cursor:pointer; margin:6px;
+    box-shadow: 0 10px 30px rgba(6,182,212,0.12);
+    transition: transform .12s, box-shadow .12s, opacity .12s;
+  }
+  .btn:hover{ transform: translateY(-4px); }
+  .btn:active{ transform: translateY(-1px) scale(.995); }
+
+  .btn.ghost{
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--glass-border);
+    box-shadow: none;
+  }
+
+  /* category grid */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    margin-top:12px;
+  }
+
+  .category{
+    position:relative;
+    padding:16px;
+    border-radius:12px;
+    cursor:pointer;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.02);
+    background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    transition: transform .18s, box-shadow .18s;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-height:86px;
+  }
+  .category:hover{ transform: translateY(-8px); box-shadow: 0 18px 40px rgba(2,6,23,0.5); }
+
+  .category .cat-icon{
+    width:48px; height:48px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    color:var(--accent-solid);
+    font-weight:700;
+    box-shadow: inset 0 -8px 20px rgba(255,255,255,0.01);
+  }
+
+  .category h3{ margin:0; font-size:15px; color:#fff; }
+  .category .meta{ font-size:12px; color:var(--muted); }
+
+  /* game area */
+  .game-area{ display:none; margin-top:12px; }
+
+  .panel{
+    display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  }
+
+  .info{
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .info .small{ font-size:13px; color:var(--muted); }
+  .info strong{ color:#fff; font-weight:700; }
+
+  .timer-pill{
+    background: linear-gradient(90deg,#0f1724, rgba(255,255,255,0.02));
+    padding:8px 12px; border-radius:999px; display:flex; gap:8px; align-items:center;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .timer-pill .num{ font-weight:800; font-size:18px; color:#fff; letter-spacing:1px; }
+
+  /* hint / word box */
+  .word-box{
+    font-size:40px; letter-spacing:8px; padding:18px 20px; border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    margin:16px 0; min-height:84px; display:flex; align-items:center; justify-content:center;
+    color:#fff; width:100%; text-align:center;
+    border: 1px solid rgba(255,255,255,0.02);
+  }
+
+  .hint-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; width:100%; }
+  input[type="text"]{
+    padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:inherit;
+    outline:none; min-width:260px; flex:1;
+  }
+
+  .controls{ display:flex; gap:8px; align-items:center; width:100%; max-width:720px; flex-wrap:wrap; }
+
+  .status{ margin-top:12px; padding:12px; border-radius:12px; background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.02); }
+  .progress{ height:12px; background: rgba(255,255,255,0.03); border-radius:999px; overflow:hidden; flex:1; margin-left:12px; }
+  .progress > i{ display:block; height:100%; background: linear-gradient(90deg,#06b6d4,#647eff); width:0%; transition: width 0.36s linear; }
+
+  .result{ display:none; padding:16px; border-radius:12px; margin-top:12px; font-weight:600; }
+  .result.success{ background: rgba(22,163,74,0.10); border: 1px solid rgba(22,163,74,0.14); color: var(--success); }
+  .result.fail{ background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.12); color: var(--danger); }
+
+  .muted-note{ font-size:13px; color:var(--muted); margin-top:8px; }
+
+  /* footer */
+  footer{ margin-top:18px; text-align:center; color:var(--muted); font-size:13px; }
+
+  /* small screens */
+  @media (max-width:720px){
+    .word-box{ font-size:28px; letter-spacing:6px; padding:14px; min-height:70px; }
+    header h1{ font-size:18px; }
+    .logo .badge{ width:44px; height:44px; font-size:16px; }
+    .grid{ gap:10px; }
+  }
+
+  /* disabled look */
+  .disabled{ opacity:0.5; pointer-events:none; filter:grayscale(.15); }
+
+  /* subtle entrance */
+  .fade-in{ animation: fadein .36s ease both; }
+  @keyframes fadein{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card fade-in" id="homeCard">
+      <header>
+        <div class="logo">
+          <div class="badge">WW</div>
+          <div>
+            <h1>เกมทายคำศัพท์ Word What</h1>
+            <p class="lead">ทายคำให้ทันเวลา เลือกหมวดแล้วเริ่มได้เลย</p>
+          </div>
+        </div>
+
+        <div style="text-align:right">
+          <div class="small muted-note">คะแนนรวม <strong id="score">0</strong></div>
+          <div style="height:6px"></div>
+          <button class="btn" id="startBtn">เริ่มเกม</button>
+        </div>
+      </header>
+
+      <div id="homeScreen" class="center">
+        <p class="muted-note">คลิกเพื่อเลือกหมวดคำศัพท์ที่ต้องการฝึก</p>
+      </div>
+
+      <div id="categoryScreen" style="display:none">
+        <h2 style="margin-top:0">เลือกหมวดคำศัพท์</h2>
+        <div class="grid" id="categoryList">
+          <!-- categories injected by JS -->
+        </div>
+        <div style="margin-top:14px" class="center">
+          <button class="btn ghost" id="backToHome">กลับ</button>
+        </div>
+      </div>
+
+      <div id="gameScreen" class="game-area">
+        <div class="panel">
+          <div class="info">
+            <div class="small">หมวด: <strong id="currentCategory">—</strong></div>
+            <div class="small">คะแนนรอบนี้: <strong id="roundScore">0</strong></div>
+          </div>
+
+          <div class="timer-pill">
+            <div class="small">เวลา</div>
+            <div class="num" id="timer">00</div>
+          </div>
+        </div>
+
+        <div class="center" style="margin-top:14px">
+          <div class="word-box" id="hintBox">_ _ _ _ _</div>
+          <div class="small muted-note" id="hintInfo">คำใบ้จะปรากฏเมื่อเริ่มเกม</div>
+
+          <div class="hint-row" style="margin-top:14px; width:100%; max-width:720px">
+            <div style="flex:1; display:flex; gap:8px; align-items:center;">
+              <input type="text" id="guessInput" placeholder="พิมพ์คำที่คิดว่าใช่" autocomplete="off" />
+              <button class="btn" id="submitGuess">ทาย</button>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn ghost" id="hintLetterBtn" title="เปิดเผยตัวอักษร 1 ตัว">ขอคำใบ้</button>
+              <button class="btn ghost" id="giveUp">ยอมแพ้</button>
+            </div>
+          </div>
+
+          <div class="status" style="width:100%;max-width:720px">
+            <div class="small">ความคืบหน้า</div>
+            <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+          </div>
+
+          <div id="resultBox" class="result" role="status" aria-live="polite"></div>
+
+          <div style="margin-top:12px" class="center">
+            <button class="btn" id="tryAgain" style="display:none">ลองอีกครั้ง</button>
+            <button class="btn ghost" id="goHome">กลับสู่หน้าหลัก</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="about" style="margin-top:14px;color:var(--muted);font-size:13px">
+        <div>By TLE — Word What</div>
+      </div>
+    </div>
+
+    <footer style="text-align:center;margin-top:12px;color:var(--muted)">BY TLENAJA</footer>
+  </div>
+
+<script>
+/* ====== ข้อมูลหมวดและคำศัพท์ (เพิ่ม 3 หมวดใหม่แต่ละหมวด 30 คำ) ====== */
+const CATEGORIES = {
+  สัตว์: [
+    "ช้าง","ม้า","หมา","แมว","กระต่าย","นก","ปลา","เต่า","วัว","แกะ",
+    "แพะ","สุนัขจิ้งจอก","ลิง","ชะมด","ชะนี","กวาง","จิ้งจก","กบ","หนู","กระรอก",
+    "นาก","กุ้ง","ปู","ปลาวาฬ","โลมา","เต่าทะเล","อินทรี","หงส์","นกกระจอก","มังกร"
+  ],
+  อาหาร: [
+    "ส้มตำ","ผัดไทย","ข้าวมันไก่","แกงเขียวหวาน","ซุป","พิซซ่า","ข้าวเหนียว","ขนมปัง","ส้ม","ก๋วยเตี๋ยว",
+    "ข้าวซอย","ต้มยำ","สุกี้","ไก่ย่าง","น้ำพริก","ปลาทอด","แกงจืด","ขนมจีน","ข้าวเหนียวมะม่วง","ข้าวผัด",
+    "สเต็ก","เผือกทอด","ขนมโตเกียว","แพนเค้ก","มัสมั่น","ข้าวคลุกกะปิ","แฮมเบอร์เกอร์","พาสต้า","ลูกชิ้น","บะหมี่"
+  ],
+  ผลไม้: [
+    "มะม่วง","กล้วย","แตงโม","สับปะรด","ส้ม","องุ่น","แอปเปิล","มะละกอ","ลิ้นจี่","สตรอว์เบอร์รี",
+    "ลูกพลับ","เชอร์รี่","แพร์","มะม่วงหิมพานต์","มะม่วงน้ำดอกไม้","มะขาม","สับปะรดทอง","มะเฟือง","ฝรั่ง","ทุเรียน",
+    "มังคุด","กีวี","แคนตาลูป","แอปริคอต","บลูเบอร์รี","พีช","แอโวคาโด","ลูกตาล","แฉะ","มะพร้าว"
+  ],
+  ดอกไม้: [
+    "กุหลาบ","ลิลลี่","กล้วยไม้","ทานตะวัน","ดาวเรือง","เบญจมาศ","ชบา","มะลิ","บัว","ไฮเดรนเยีย",
+    "มะลิวัลย์","เอื้อง","เฟื่องฟ้า","กระดังงา","แอสเตอร์","คาร์เนชั่น","ไอริส","เปราะหอม","สายหยุด","กล้วยไม้หวาย",
+    "ลำดวน","ลูกหมี","พุด","พุดซ้อน","ยี่โถ","พวงชมพู","วาสนา","จำปี","จำปา","แม่งาด"
+  ],
+  "ยานพาหนะ": [
+    "รถยนต์","มอเตอร์ไซค์","จักรยาน","รถบัส","รถตู้","รถไฟ","เครื่องบิน","เรือ","แท็กซี่","แท็กซี่",
+    "รถบรรทุก","รถปิกอัพ","รถไฟฟ้า","รถไฟใต้ดิน","เฮลิคอปเตอร์","เรือด่วน","เรือเฟอร์รี่","เรือเร็ว","รถแทรกเตอร์","สกู๊ตเตอร์",
+    "รถไฟชานเมือง","รถไฟความเร็วสูง","รถม้า","รถราง","รถตัก","รถยก","เจ็ตสกี","เรือตรวจการณ์","รถพยาบาล","รถดับเพลิง"
+  ],
+
+  /* หมวดใหม่ 1: เครื่องใช้ไฟฟ้า */
+  "เครื่องใช้ไฟฟ้า": [
+    "โทรทัศน์","ตู้เย็น","ไมโครเวฟ","พัดลม","เครื่องปรับอากาศ","เครื่องซักผ้า","เตารีด","เครื่องดูดฝุ่น","โฮมเธียเตอร์","เครื่องทำน้ำอุ่น",
+    "หม้อหุงข้าว","กาต้มน้ำ","เตาไฟฟ้า","เตาไมโครเวฟ","เตาแก๊ส","เครื่องปั่น","เครื่องบด","คอมพิวเตอร์","โน้ตบุ๊ก","แท็บเล็ต",
+    "ลำโพง","หูฟัง","กล้องถ่ายรูป","เครื่องชงกาแฟ","เครื่องฟอกอากาศ","เครื่องเล่นดีวีดี","เราต์เตอร์","เครื่องบันทึกเสียง","เครื่องวัดอุณหภูมิ","เครื่องชาร์จ"
+  ],
+
+  /* หมวดใหม่ 2: เครื่องแต่งกาย */
+  "เครื่องแต่งกาย": [
+    "เสื้อยืด","กางเกงยีนส์","กระโปรง","เดรส","สูท","เน็คไท","เสื้อเชิ้ต","แจ็กเก็ต","เสื้อกันหนาว","เสื้อโค้ท",
+    "รองเท้า","รองเท้าผ้าใบ","รองเท้าหนัง","รองเท้าแตะ","ถุงเท้า","หมวก","ผ้าพันคอ","ถุงมือ","ชุดชั้นใน","บิกินี่",
+    "แจ็คเก็ตหนัง","เสื้อกล้าม","เสื้อโปโล","ชุดกีฬา","เอี๊ยม","เข็มขัด","กระเป๋าถือ","กระเป๋าสะพาย","แว่นตากันแดด","นาฬิกา"
+  ],
+
+  /* หมวดใหม่ 3: อาชีพ */
+  "อาชีพ": [
+    "แพทย์","พยาบาล","หมอเทคนิค","ครู","อาจารย์","วิศวกร","นักออกแบบ","นักบัญชี","นักข่าว","นักเขียน",
+    "โปรแกรมเมอร์","นักกฎหมาย","ทนายความ","นักสังคมสงเคราะห์","ช่างไม้","ช่างไฟฟ้า","ช่างประปา","ช่างยนต์","เชฟ","พ่อค้าขายของ",
+    "นักการตลาด","นักวิจัย","นักแปล","นักดนตรี","นักแสดง","นักกีฬา","ตำรวจ","ทหาร","พนักงานธนาคาร","นักบิน"
+  ]
+};
+
+/* ค่าเริ่มต้น */
+let currentCategory = null;
+let currentWord = null;
+let timeLimit = 30;
+let timerId = null;
+let timeLeft = 0;
+let totalScore = 0;
+let roundScore = 0;
+
+/* hint state */
+let revealedIndices = [];
+let hintUsed = false;
+
+/* DOM refs */
+const startBtn = document.getElementById('startBtn');
+const categoryScreen = document.getElementById('categoryScreen');
+const homeScreen = document.getElementById('homeScreen');
+const categoryList = document.getElementById('categoryList');
+const backToHome = document.getElementById('backToHome');
+
+const gameScreen = document.getElementById('gameScreen');
+const currentCategoryEl = document.getElementById('currentCategory');
+const hintBox = document.getElementById('hintBox');
+const hintInfo = document.getElementById('hintInfo');
+const timerEl = document.getElementById('timer');
+const progressBar = document.getElementById('progressBar');
+const guessInput = document.getElementById('guessInput');
+const submitGuess = document.getElementById('submitGuess');
+const giveUp = document.getElementById('giveUp');
+const resultBox = document.getElementById('resultBox');
+const tryAgain = document.getElementById('tryAgain');
+const goHome = document.getElementById('goHome');
+const scoreEl = document.getElementById('score');
+const roundScoreEl = document.getElementById('roundScore');
+const hintLetterBtn = document.getElementById('hintLetterBtn');
+
+/* view toggles */
+function showHome(){
+  categoryScreen.style.display='none';
+  gameScreen.style.display='none';
+  homeScreen.style.display='flex';
+  resultBox.style.display='none';
+  tryAgain.style.display='none';
+  currentCategory = null; currentWord = null;
+}
+function showCategories(){
+  homeScreen.style.display='none';
+  categoryScreen.style.display='block';
+  gameScreen.style.display='none';
+}
+function showGame(){
+  homeScreen.style.display='none';
+  categoryScreen.style.display='none';
+  gameScreen.style.display='block';
+  resultBox.style.display='none';
+}
+
+/* render categories with small icon (first char) */
+function renderCategories(){
+  categoryList.innerHTML='';
+  Object.keys(CATEGORIES).forEach(cat=>{
+    const el = document.createElement('div');
+    el.className='category';
+    const icon = document.createElement('div');
+    icon.className = 'cat-icon';
+    icon.textContent = cat[0] || '#';
+    const title = document.createElement('h3');
+    title.textContent = cat;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = `${CATEGORIES[cat].length} คำ`;
+    el.appendChild(icon);
+    el.appendChild(title);
+    el.appendChild(meta);
+    el.addEventListener('click', ()=> startRound(cat));
+    categoryList.appendChild(el);
+  });
+}
+
+/* start a round */
+function startRound(cat){
+  currentCategory = cat;
+  currentWord = pickRandom(CATEGORIES[cat]);
+  timeLeft = timeLimit;
+  roundScore = 0;
+  scoreEl.textContent = totalScore;
+  roundScoreEl.textContent = roundScore;
+  currentCategoryEl.textContent = cat;
+  revealedIndices = [];
+  hintUsed = false;
+  updateHintMasked();
+  hintInfo.textContent = 'ทายคำศัพท์ภายในเวลาที่กำหนด';
+  guessInput.value='';
+  guessInput.disabled = false;
+  submitGuess.disabled = false;
+  giveUp.disabled = false;
+  enableHintButton();
+  showGame();
+  updateTimerDisplay();
+  startTimer();
+  tryAgain.style.display='none';
+  resultBox.style.display='none';
+  guessInput.focus();
+}
+
+/* utilities */
+function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function updateHintMasked(revealAll = false){
+  if(!currentWord) { hintBox.textContent = '—'; return; }
+  if(revealAll){ hintBox.textContent = currentWord; return; }
+  const chars = [...currentWord];
+  const shown = chars.map((ch, idx) => {
+    if(ch === ' ') return ' ';
+    return revealedIndices.includes(idx) ? ch : '_';
+  });
+  hintBox.textContent = shown.join(' ');
+}
+
+/* timer */
+function startTimer(){
+  stopTimer();
+  updateTimerDisplay();
+  timerId = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft <= 0){
+      stopTimer();
+      onTimeUp();
+    }
+  },1000);
+}
+function stopTimer(){ if(timerId) { clearInterval(timerId); timerId = null; } }
+function updateTimerDisplay(){
+  timerEl.textContent = String(timeLeft).padStart(2,'0');
+  const pct = Math.max(0, ((timeLimit - timeLeft) / timeLimit) * 100);
+  progressBar.style.width = pct + '%';
+}
+
+/* time up */
+function onTimeUp(){
+  updateHintMasked(true);
+  disableInteraction();
+  disableHintButton();
+  showResult(false, `หมดเวลา คำตอบคือ: ${currentWord}`);
+}
+
+/* disable/enable */
+function disableInteraction(){
+  guessInput.disabled = true;
+  submitGuess.disabled = true;
+  submitGuess.classList.add('disabled');
+  giveUp.disabled = true;
+  giveUp.classList.add('disabled');
+}
+function disableHintButton(){
+  hintLetterBtn.disabled = true;
+  hintLetterBtn.classList.add('disabled');
+  hintLetterBtn.textContent = 'คำใบ้ใช้แล้ว';
+}
+function enableHintButton(){
+  hintLetterBtn.disabled = false;
+  hintLetterBtn.classList.remove('disabled');
+  hintLetterBtn.textContent = 'ขอคำใบ้';
+}
+
+/* give one letter hint */
+function giveHintLetter(){
+  if(hintUsed || !currentWord) return;
+  const chars = [...currentWord];
+  const candidates = chars
+    .map((ch, idx) => ({ch, idx}))
+    .filter(x => x.ch !== ' ' && !revealedIndices.includes(x.idx));
+  if(candidates.length === 0){
+    disableHintButton();
+    hintUsed = true;
+    return;
+  }
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  revealedIndices.push(pick.idx);
+  hintUsed = true;
+  updateHintMasked();
+  disableHintButton();
+}
+
+/* check guess */
+function checkGuess(){
+  const g = guessInput.value.trim();
+  if(!g) return;
+  const normalize = s => s.replace(/\s+/g,'').toLowerCase();
+  if(normalize(g) === normalize(currentWord)){
+    totalScore++;
+    roundScore++;
+    scoreEl.textContent = totalScore;
+    roundScoreEl.textContent = roundScore;
+    stopTimer();
+    updateHintMasked(true);
+    disableInteraction();
+    disableHintButton();
+    showResult(true, `ถูกต้อง! คำตอบคือ: ${currentWord}`);
+  } else {
+    resultBox.textContent = 'ไม่ถูก ลองอีกครั้ง';
+    resultBox.className = 'result fail';
+    resultBox.style.display = 'block';
+    guessInput.value='';
+    guessInput.focus();
+    setTimeout(()=>{ resultBox.style.display='none'; },1200);
+  }
+}
+
+/* show result */
+function showResult(win, message){
+  stopTimer();
+  resultBox.style.display = 'block';
+  resultBox.textContent = message;
+  resultBox.className = 'result ' + (win ? 'success' : 'fail');
+  tryAgain.style.display = 'inline-block';
+  tryAgain.textContent = 'ลองอีกครั้ง';
+  tryAgain.onclick = () => tryAgainRound();
+}
+
+/* try again same category */
+function tryAgainRound(){
+  if(!currentCategory) return;
+  currentWord = pickRandom(CATEGORIES[currentCategory]);
+  timeLeft = timeLimit;
+  revealedIndices = [];
+  hintUsed = false;
+  updateHintMasked();
+  resultBox.style.display = 'none';
+  guessInput.value='';
+  guessInput.disabled = false;
+  submitGuess.disabled = false;
+  submitGuess.classList.remove('disabled');
+  giveUp.disabled = false;
+  giveUp.classList.remove('disabled');
+  enableHintButton();
+  guessInput.focus();
+  startTimer();
+  tryAgain.style.display='none';
+}
+
+/* give up */
+function giveUpRound(){
+  stopTimer();
+  updateHintMasked(true);
+  disableInteraction();
+  disableHintButton();
+  showResult(false, `ยอมแพ้ คำตอบคือ: ${currentWord}`);
+}
+
+/* go home */
+function goToHome(){
+  stopTimer();
+  showHome();
+}
+
+/* Events */
+startBtn.addEventListener('click', ()=> {
+  renderCategories();
+  showCategories();
+});
+backToHome.addEventListener('click', showHome);
+
+submitGuess.addEventListener('click', checkGuess);
+guessInput.addEventListener('keydown', (e)=> { if(e.key === 'Enter') checkGuess(); });
+giveUp.addEventListener('click', giveUpRound);
+goHome.addEventListener('click', goToHome);
+hintLetterBtn.addEventListener('click', giveHintLetter);
+
+/* init */
+showHome();
+renderCategories();
+</script>
+</body>
+</html>
