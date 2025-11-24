@@ -9,12 +9,10 @@
 
 <style>
   :root {
-    /* Color Palette: Soft & Playful */
     --bg-body: #f0f7ff;
     --bg-card: #ffffff;
     --primary: #4facfe;
     --primary-dark: #00f2fe;
-    --accent: #ff9a9e;
     --text-main: #2d3436;
     --text-muted: #636e72;
     --success: #00b894;
@@ -61,7 +59,7 @@
   /* Header */
   .logo-area { margin-bottom: 24px; }
   h1 { 
-    font-family: 'Fredoka', var(--font-main); /* English font for Logo */
+    font-family: 'Fredoka', var(--font-main);
     font-size: 2.2rem; 
     background: linear-gradient(45deg, #4facfe, #00f2fe);
     -webkit-background-clip: text;
@@ -102,6 +100,14 @@
     min-width: auto;
     padding: 10px 20px;
     font-size: 0.95rem;
+  }
+  /* Style for disabled hint button */
+  .btn.hint:disabled {
+    background: #dfe6e9;
+    color: #b2bec3;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
   }
 
   /* Grid for Categories */
@@ -147,7 +153,8 @@
     color: var(--text-main);
     margin: 30px 0;
     min-height: 60px;
-    font-family: 'Fredoka', var(--font-main); /* Monospace-ish */
+    font-family: 'Fredoka', var(--font-main);
+    text-transform: uppercase;
   }
 
   .input-area {
@@ -195,11 +202,9 @@
   @keyframes shake { 0%{transform: translateX(0);} 25%{transform: translateX(-5px);} 75%{transform: translateX(5px);} 100%{transform: translateX(0);} }
   .shake { animation: shake 0.3s; }
 
-  /* Helpers */
   .hidden { display: none !important; }
   .w-100 { width: 100%; }
 
-  /* Mobile Polish */
   @media (max-width: 480px) {
     .card { padding: 20px; }
     .word-display { font-size: 2rem; letter-spacing: 4px; }
@@ -216,7 +221,7 @@
     <div class="logo-area">
       <div style="font-size: 3rem; margin-bottom: 10px;">🦁🍎🚗</div>
       <h1>Word What?</h1>
-      <p class="subtitle">เกมทายคำศัพท์ ฝึกสมอง ประลองปัญญา</p>
+      <p class="subtitle">เกมทายคำศัพท์ภาษาอังกฤษ</p>
     </div>
     <button class="btn" onclick="showCategories()">เริ่มเล่นเกม</button>
     <p style="margin-top: 20px; font-size: 0.9rem; color: #b2bec3;">คะแนนสูงสุด: <span id="highScore">0</span></p>
@@ -224,7 +229,7 @@
 
   <div id="categoryScreen" class="card hidden animate-pop">
     <h2>เลือกหมวดคำศัพท์</h2>
-    <p class="subtitle">อยากทายคำเกี่ยวกับอะไรดี?</p>
+    <p class="subtitle">Choose a category</p>
     <div class="grid" id="categoryGrid"></div>
     <div style="margin-top: 20px;">
       <button class="btn secondary" onclick="goHome()">กลับหน้าหลัก</button>
@@ -234,7 +239,7 @@
   <div id="gameScreen" class="card hidden">
     <div class="top-bar">
       <div class="score-badge">คะแนน: <span id="currentScore">0</span></div>
-      <div class="timer-badge">⏰ <span id="timerDisplay">30</span></div>
+      <div class="timer-badge">⏰ <span id="timerDisplay">60</span></div>
     </div>
 
     <div class="subtitle" style="margin-bottom: 5px;">หมวด: <span id="displayCategory">...</span></div>
@@ -242,7 +247,7 @@
     <div id="wordBox" class="word-display">_ _ _ _ _</div>
     
     <div class="input-area">
-      <input type="text" id="guessInput" placeholder="พิมพ์คำตอบที่นี่..." autocomplete="off">
+      <input type="text" id="guessInput" placeholder="พิมพ์คำศัพท์ภาษาอังกฤษ..." autocomplete="off">
       <button class="btn w-100" id="submitBtn">ส่งคำตอบ</button>
       
       <div class="action-row">
@@ -257,7 +262,7 @@
   <div id="resultScreen" class="card hidden animate-pop">
     <div style="font-size: 4rem; margin-bottom: 10px;" id="resultEmoji">🎉</div>
     <h2 id="resultTitle">จบเกม!</h2>
-    <p class="subtitle" id="resultMsg">คุณทำได้ยอดเยี่ยมมาก</p>
+    <p class="subtitle" id="resultMsg">You did great!</p>
     
     <div style="background: #f1f2f6; padding: 15px; border-radius: 12px; margin: 20px 0;">
       <p style="font-size: 1.2rem;">คะแนนที่ได้</p>
@@ -273,27 +278,52 @@
 </div>
 
 <script>
-// --- Data ---
+// --- Data: 20 English Words per Category ---
 const CATEGORIES = {
-  "สัตว์": {
+  "Animals": {
     emoji: "🐶",
-    words: ["ช้าง","ม้า","หมา","แมว","กระต่าย","นก","ปลา","เต่า","ลิง","กบ","หนู","กุ้ง","ปู","สิงโต","เสือ","ยีราฟ","หมู","เป็ด","ไก่"]
+    words: [
+      "Elephant","Horse","Dog","Cat","Rabbit",
+      "Bird","Fish","Turtle","Monkey","Frog",
+      "Mouse","Lion","Tiger","Giraffe","Pig",
+      "Duck","Chicken","Cow","Sheep","Bear"
+    ]
   },
-  "อาหาร": {
-    emoji: "🍜",
-    words: ["ส้มตำ","ผัดไทย","ข้าวมันไก่","ซุป","พิซซ่า","ขนมปัง","ก๋วยเตี๋ยว","ต้มยำ","สุกี้","ไก่ย่าง","แกงจืด","ไข่เจียว","ข้าวผัด","สเต็ก","ลูกชิ้น"]
+  "Food": {
+    emoji: "🍔",
+    words: [
+      "Salad","Noodle","Pizza","Bread","Soup",
+      "Steak","Burger","Sandwich","Fries","Ice Cream",
+      "Donut","Sushi","Cake","Cookie","Chocolate",
+      "Popcorn","Juice","Milk","Egg","Cheese"
+    ]
   },
-  "ผลไม้": {
-    emoji: "🍉",
-    words: ["มะม่วง","กล้วย","แตงโม","สับปะรด","ส้ม","องุ่น","แอปเปิล","มะละกอ","ลิ้นจี่","เงาะ","ลำไย","ทุเรียน","มังคุด","ฝรั่ง","มะพร้าว"]
+  "Fruits": {
+    emoji: "🍎",
+    words: [
+      "Mango","Banana","Watermelon","Pineapple","Orange",
+      "Grape","Apple","Papaya","Lemon","Kiwi",
+      "Durian","Coconut","Strawberry","Cherry","Peach",
+      "Pear","Avocado","Melon","Berry","Plum"
+    ]
   },
-  "ของใช้": {
-    emoji: "🎒",
-    words: ["ดินสอ","ยางลบ","ไม้บรรทัด","สมุด","กระเป๋า","รองเท้า","ถุงเท้า","แก้วน้ำ","จาน","ช้อน","ส้อม","หวี","แปรงสีฟัน","สบู่"]
+  "Objects": {
+    emoji: "✏️",
+    words: [
+      "Pencil","Eraser","Ruler","Notebook","Bag",
+      "Shoe","Sock","Cup","Plate","Spoon",
+      "Fork","Comb","Soap","Towel","Pillow",
+      "Clock","Scissors","Glasses","Phone","Lamp"
+    ]
   },
-  "ยานพาหนะ": {
+  "Vehicles": {
     emoji: "🚀",
-    words: ["รถยนต์","จักรยาน","รถไฟ","เครื่องบิน","เรือ","รถตู้","รถบัส","รถตุ๊กตุ๊ก","จรวด","เฮลิคอปเตอร์"]
+    words: [
+      "Car","Bike","Train","Plane","Boat",
+      "Van","Bus","Rocket","Helicopter","Motorcycle",
+      "Submarine","Balloon","Ambulance","Taxi","Truck",
+      "Scooter","Tractor","Ship","Jeep","UFO"
+    ]
   }
 };
 
@@ -302,7 +332,7 @@ let state = {
   category: null,
   word: "",
   score: 0,
-  timer: 30,
+  timer: 60,
   interval: null,
   revealed: [],
   isPlaying: false
@@ -356,7 +386,7 @@ function showCategories() {
 function startGame(categoryKey) {
   state.category = categoryKey;
   state.score = 0;
-  state.timer = 60; // ให้เวลา 60 วินาทีต่อรอบใหญ่ หรือจะเปลี่ยนเป็นต่อข้อก็ได้
+  state.timer = 60; 
   state.isPlaying = true;
   
   els.score.innerText = state.score;
@@ -375,15 +405,19 @@ function nextWord() {
   // Reset UI
   els.input.value = '';
   els.input.focus();
+  
+  // !!! รีเซ็ตปุ่มคำใบ้ทุกครั้งที่ขึ้นคำใหม่ !!!
   els.hintBtn.disabled = false;
   els.hintBtn.style.opacity = 1;
+  els.hintBtn.innerText = '💡 ขอคำใบ้'; 
+
   hideFeedback();
   renderWord();
 }
 
 function renderWord() {
   const display = state.word.split('').map((char, i) => {
-    if (char === ' ') return '&nbsp;'; // เว้นวรรค
+    if (char === ' ') return '&nbsp;'; 
     return state.revealed[i] ? char : '_';
   }).join(' ');
   els.wordBox.innerHTML = display;
@@ -408,7 +442,7 @@ function updateTimerUI() {
 }
 
 function useHint() {
-  // เปิดเผย 1 ตัวอักษรแบบสุ่มที่ยังไม่เปิด
+  // Check if unrevealed
   const unrevealedIndices = state.word.split('').map((c, i) => ({c, i}))
     .filter(item => !state.revealed[item.i] && item.c !== ' ');
   
@@ -416,14 +450,12 @@ function useHint() {
     const randomItem = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
     state.revealed[randomItem.i] = true;
     renderWord();
-    
-    // หักเวลาหรือคะแนนเป็นค่าปรับ (Optional)
-    // state.timer = Math.max(1, state.timer - 5); 
-    
-    // Disable hint button for this word if wanted, or just let them use it all
-    // els.hintBtn.disabled = true;
-    // els.hintBtn.style.opacity = 0.5;
     els.input.focus();
+
+    // !!! ปิดปุ่มหลังจากกดใช้ 1 ครั้ง !!!
+    els.hintBtn.disabled = true;
+    els.hintBtn.style.opacity = 0.5;
+    els.hintBtn.innerText = 'ใช้แล้ว';
   }
 }
 
@@ -431,19 +463,20 @@ function checkGuess() {
   const guess = els.input.value.trim();
   if (!guess) return;
 
-  if (guess.replace(/\s+/g,'') === state.word.replace(/\s+/g,'')) {
+  // เปรียบเทียบแบบไม่สนตัวพิมพ์เล็ก/ใหญ่ และตัดช่องว่างออก
+  if (guess.replace(/\s+/g,'').toLowerCase() === state.word.replace(/\s+/g,'').toLowerCase()) {
     // Correct
     state.score += 10;
-    state.timer += 5; // Bonus time
+    state.timer += 5; 
     els.score.innerText = state.score;
-    showFeedback(true, `ถูกต้อง! ${state.word}`);
+    showFeedback(true, `Correct! It is "${state.word}"`);
     setTimeout(() => {
       nextWord();
     }, 1000);
   } else {
     // Wrong
     els.input.classList.add('shake');
-    showFeedback(false, 'ยังไม่ถูก ลองใหม่นะ');
+    showFeedback(false, 'Try again!');
     setTimeout(() => els.input.classList.remove('shake'), 400);
     els.input.value = '';
     els.input.focus();
@@ -464,16 +497,15 @@ function finishGame(win) {
   clearInterval(state.interval);
   state.isPlaying = false;
   
-  // Update Highscore
-  const oldHigh = localStorage.getItem('ww_highscore') || 0;
+  const oldHigh = parseInt(localStorage.getItem('ww_highscore') || '0');
   if (state.score > oldHigh) {
     localStorage.setItem('ww_highscore', state.score);
   }
 
   els.finalScore.innerText = state.score;
   document.getElementById('resultEmoji').innerText = state.score > 0 ? '🏆' : '😅';
-  document.getElementById('resultTitle').innerText = state.score > 0 ? 'สุดยอดไปเลย!' : 'พยายามเข้านะ';
-  document.getElementById('resultMsg').innerText = `เวลาหมดแล้ว คำตอบสุดท้ายคือ "${state.word}"`;
+  document.getElementById('resultTitle').innerText = state.score > 0 ? 'Awesome!' : 'Time Up!';
+  document.getElementById('resultMsg').innerText = `The answer was "${state.word}"`;
   
   switchScreen('result');
 }
