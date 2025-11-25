@@ -9,16 +9,11 @@
 
 <style>
   :root {
-    --bg-body: #f0f7ff;
-    --bg-card: #ffffff;
-    --primary: #4facfe;
-    --primary-dark: #00f2fe;
-    --text-main: #2d3436;
-    --text-muted: #636e72;
-    --success: #00b894;
-    --danger: #ff7675;
-    --shadow: 0 10px 25px rgba(100, 100, 100, 0.1);
-    --radius: 20px;
+    --primary: #FF9F1C;
+    --primary-dark: #FFBF69;
+    --text-main: #2EC4B6;
+    --text-muted: #6e7c7c;
+    --radius: 25px;
     --font-main: 'Kanit', sans-serif;
   }
 
@@ -26,80 +21,157 @@
   
   body {
     font-family: var(--font-main);
-    background: var(--bg-body);
-    background-image: radial-gradient(#dfe9f3 1px, transparent 1px);
-    background-size: 20px 20px;
-    color: var(--text-main);
     height: 100vh;
+    overflow: hidden; /* ห้ามเลื่อนหน้าจอ ให้เหมือนแอพ */
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 16px;
+    color: #2d3436;
   }
 
+  /* =========================================
+     SCENE: ฉากหลัง (ท้องฟ้า หญ้า การ์ตูน)
+     ========================================= */
+  .scene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* ให้อยู่ด้านหลังสุด */
+    background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 60%, #a8e063 60%, #56ab2f 100%);
+  }
+
+  /* ก้อนเมฆ */
+  .cloud {
+    position: absolute;
+    font-size: 5rem;
+    opacity: 0.8;
+    animation: floatCloud 20s linear infinite;
+    top: 10%;
+  }
+  .c1 { left: -10%; animation-duration: 25s; }
+  .c2 { top: 20%; left: -20%; animation-duration: 35s; animation-delay: 5s; font-size: 3rem; opacity: 0.6; }
+
+  /* พื้นหญ้าตกแต่ง */
+  .grass-decor {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40%; 
+    /* สีพื้นหญ้า */
+    background: transparent;
+  }
+
+  /* ตัวละครและต้นไม้ */
+  .prop {
+    position: absolute;
+    bottom: 38%; /* วางบนเส้นขอบหญ้าพอดี (ปรับตาม % ของ gradient body) */
+    font-size: 4rem;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+  }
+  
+  /* ต้นไม้ */
+  .tree-1 { left: -20px; font-size: 8rem; bottom: 35%; z-index: 0; }
+  .tree-2 { right: -20px; font-size: 7rem; bottom: 36%; z-index: 0; }
+  
+  /* สัตว์ (Animation เด้งดึ๋ง) */
+  .char-1 { 
+    left: 15%; 
+    font-size: 5rem; 
+    animation: bounce 3s infinite ease-in-out;
+    bottom: 37%;
+  }
+  .char-2 { 
+    right: 15%; 
+    font-size: 4.5rem; 
+    animation: bounce 4s infinite ease-in-out; 
+    animation-delay: 1s;
+    bottom: 36%;
+    transform: scaleX(-1); /* กลับด้านให้หันหน้าเข้าหาตรงกลาง */
+  }
+  .char-3 {
+    left: 50%;
+    margin-left: -150px; /* ขยับหลบกล่องกลาง */
+    font-size: 3rem;
+    bottom: 39%;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes floatCloud { 
+    0% { transform: translateX(0); } 
+    100% { transform: translateX(120vw); } 
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* =========================================
+     UI: กล่องเกม
+     ========================================= */
   .container {
     width: 100%;
-    max-width: 600px;
+    max-width: 550px;
     margin: 0 auto;
+    position: relative;
+    z-index: 10; /* ให้อยู่เหนือฉากหลัง */
   }
 
-  /* Card Style */
   .card {
-    background: var(--bg-card);
+    background: rgba(255, 255, 255, 0.95); /* สีขาวโปร่งแสงนิดๆ */
     border-radius: var(--radius);
     padding: 30px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15); 
     text-align: center;
     position: relative;
     overflow: hidden;
-    border: 2px solid #fff;
+    border: 4px solid #fff;
+    backdrop-filter: blur(5px); /* เบลอฉากหลังที่ซ้อนอยู่ */
     transition: all 0.3s ease;
   }
 
-  /* Header */
   .logo-area { margin-bottom: 24px; }
   h1 { 
     font-family: 'Fredoka', var(--font-main);
-    font-size: 2.2rem; 
-    background: linear-gradient(45deg, #4facfe, #00f2fe);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem; 
+    color: #FF9F1C;
+    text-shadow: 2px 2px 0px #fff, 4px 4px 0px rgba(0,0,0,0.1);
     margin-bottom: 8px;
   }
   .subtitle { color: var(--text-muted); font-size: 1rem; }
 
   /* Buttons */
   .btn {
-    background: linear-gradient(45deg, #4facfe, #00f2fe);
+    background: #FF9F1C;
     color: white;
     border: none;
     padding: 14px 28px;
     border-radius: 50px;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 6px 0 #e67e22;
+    transition: all 0.1s;
     font-family: var(--font-main);
     display: inline-block;
     min-width: 140px;
+    margin-bottom: 6px;
   }
-  .btn:active { transform: scale(0.96); }
+  .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #e67e22; }
   .btn.secondary {
-    background: #fff;
+    background: #f1f2f6;
     color: var(--text-muted);
-    box-shadow: inset 0 0 0 2px #dfe6e9;
+    box-shadow: 0 6px 0 #dcdde1;
   }
-  .btn.danger {
-    background: var(--danger);
-    box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4);
-  }
+  .btn.secondary:active { box-shadow: 0 0 0 #dcdde1; }
   .btn.hint {
-    background: #fdcb6e;
-    box-shadow: 0 4px 15px rgba(253, 203, 110, 0.4);
+    background: #f1c40f;
+    box-shadow: 0 6px 0 #d35400;
     min-width: auto;
     padding: 10px 20px;
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
   .btn.hint:disabled {
     background: #dfe6e9;
@@ -109,7 +181,7 @@
     transform: none;
   }
 
-  /* Grid for Categories */
+  /* Grid */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -117,20 +189,21 @@
     margin-top: 20px;
   }
   .cat-card {
-    background: #f8f9fa;
-    border-radius: 16px;
+    background: #fff;
+    border-radius: 20px;
     padding: 20px 10px;
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
-    border: 2px solid transparent;
+    border: 3px solid #f1f2f6;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   }
   .cat-card:hover {
-    background: #e3f2fd;
+    background: #fff3cd;
+    border-color: #FF9F1C;
     transform: translateY(-5px);
-    border-color: #4facfe;
   }
   .cat-emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
-  .cat-name { font-weight: 600; color: var(--text-main); font-size: 0.95rem;}
+  .cat-name { font-weight: 600; color: #2d3436; font-size: 1rem; }
 
   /* Game Screen */
   .top-bar {
@@ -138,24 +211,26 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    background: #f1f2f6;
+    background: #def4fc;
     padding: 10px 20px;
     border-radius: 50px;
+    border: 2px solid #bce6f7;
   }
-  .score-badge { font-weight: bold; color: var(--primary); }
-  .timer-badge { font-weight: bold; color: var(--danger); display: flex; align-items: center; gap: 5px;}
+  .score-badge { font-weight: bold; color: #0984e3; }
+  .timer-badge { font-weight: bold; color: #d63031; display: flex; align-items: center; gap: 5px;}
 
   .word-display {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     letter-spacing: 6px;
-    font-weight: 600;
-    color: var(--text-main);
+    font-weight: 800;
+    color: #2d3436;
     margin: 30px 0;
     min-height: 60px;
     font-family: 'Fredoka', var(--font-main);
     text-transform: uppercase;
     word-break: break-word;
     line-height: 1.2;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
   }
 
   .input-area {
@@ -168,17 +243,17 @@
   input[type="text"] {
     width: 100%;
     padding: 16px;
-    border: 2px solid #dfe6e9;
-    border-radius: 16px;
+    border: 3px solid #dfe6e9;
+    border-radius: 20px;
     font-size: 1.4rem;
     text-align: center;
     outline: none;
     font-family: var(--font-main);
     transition: border-color 0.3s;
+    background: #fdfdfd;
   }
-  input[type="text"]:focus { border-color: var(--primary); }
+  input[type="text"]:focus { border-color: #FF9F1C; background: #fff; }
   
-  /* Feedback UI */
   .feedback-msg {
     margin-top: 15px;
     padding: 12px;
@@ -186,8 +261,8 @@
     font-weight: 600;
     display: none;
   }
-  .feedback-msg.correct { background: #d4edda; color: #155724; }
-  .feedback-msg.wrong { background: #f8d7da; color: #721c24; }
+  .feedback-msg.correct { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+  .feedback-msg.wrong { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
 
   .action-row {
     display: flex;
@@ -197,9 +272,8 @@
   }
 
   /* Animations */
-  @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-  .animate-pop { animation: popIn 0.3s ease-out; }
-
+  @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   @keyframes shake { 0%{transform: translateX(0);} 25%{transform: translateX(-5px);} 75%{transform: translateX(5px);} 100%{transform: translateX(0);} }
   .shake { animation: shake 0.3s; }
 
@@ -208,19 +282,34 @@
 
   @media (max-width: 480px) {
     .card { padding: 20px; }
-    .word-display { font-size: 1.8rem; letter-spacing: 3px; }
-    h1 { font-size: 1.8rem; }
+    .word-display { font-size: 2rem; letter-spacing: 4px; }
+    h1 { font-size: 2rem; }
     .btn { padding: 12px 20px; font-size: 1rem; }
+    /* ปรับตำแหน่งสัตว์ในมือถือไม่ให้บัง */
+    .prop { font-size: 3rem; }
+    .tree-1, .tree-2 { font-size: 5rem; }
   }
 </style>
 </head>
 <body>
 
+<div class="scene">
+  <div class="cloud c1">☁️</div>
+  <div class="cloud c2">☁️</div>
+  
+  <div class="prop tree-1">🌳</div>
+  <div class="prop tree-2">🌲</div>
+  
+  <div class="prop char-1">🦒</div>
+  <div class="prop char-2">🐘</div>
+  <div class="prop char-3">🐇</div>
+</div>
+
 <div class="container">
   
   <div id="homeScreen" class="card animate-pop">
     <div class="logo-area">
-      <div style="font-size: 3rem; margin-bottom: 10px;">🦁🍔🎒</div>
+      <div style="font-size: 4rem; margin-bottom: 10px;">🦁🍔🎒</div>
       <h1>Word What?</h1>
       <p class="subtitle">เกมทายคำศัพท์ภาษาอังกฤษ</p>
     </div>
@@ -239,7 +328,7 @@
 
   <div id="gameScreen" class="card hidden">
     <div class="top-bar">
-      <div class="score-badge">คะแนน: <span id="currentScore">0</span></div>
+      <div class="score-badge">SCORE: <span id="currentScore">0</span></div>
       <div class="timer-badge">⏰ <span id="timerDisplay">60</span></div>
     </div>
 
@@ -248,7 +337,7 @@
     <div id="wordBox" class="word-display">_ _ _ _ _</div>
     
     <div class="input-area">
-      <input type="text" id="guessInput" placeholder="พิมพ์คำศัพท์ภาษาอังกฤษ..." autocomplete="off">
+      <input type="text" id="guessInput" placeholder="พิมพ์คำตอบ..." autocomplete="off">
       <button class="btn w-100" id="submitBtn">ส่งคำตอบ</button>
       
       <div class="action-row">
@@ -261,13 +350,13 @@
   </div>
 
   <div id="resultScreen" class="card hidden animate-pop">
-    <div style="font-size: 4rem; margin-bottom: 10px;" id="resultEmoji">🎉</div>
+    <div style="font-size: 5rem; margin-bottom: 10px;" id="resultEmoji">🎉</div>
     <h2 id="resultTitle">จบเกม!</h2>
     <p class="subtitle" id="resultMsg">You did great!</p>
     
-    <div style="background: #f1f2f6; padding: 15px; border-radius: 12px; margin: 20px 0;">
-      <p style="font-size: 1.2rem;">คะแนนที่ได้</p>
-      <h1 style="margin: 0; color: var(--primary);" id="finalScore">0</h1>
+    <div style="background: #def4fc; padding: 20px; border-radius: 20px; margin: 20px 0; border: 3px solid #bce6f7;">
+      <p style="font-size: 1.2rem; color: #2d3436;">คะแนนที่ได้</p>
+      <h1 style="margin: 0; color: #0984e3; font-size: 3rem;" id="finalScore">0</h1>
     </div>
 
     <div class="action-row">
@@ -284,9 +373,10 @@ const CATEGORIES = {
   "Animals": {
     emoji: "🦁",
     words: [
-      "Cow","Duck","Tiger","Fish","Bat","Cat","Dog","Chicken","Spider",
-      "Buffalo","Bee","Rabbit","Pig","Sheep","Lion","Giraffe","Penguin","Panda",
-      "Bird","Butterfly","Shark","Frog","Snake"
+      "Cow","Duck","Tiger","Fish","Bat","Cat","Dog","Chicken","Spider","Horse",
+      "Buffalo","Bee","Rabbit","Pig","Sheep","Flamingo","Lion","Giraffe","Penguin","Panda",
+      "Bird","Butterfly","Shark","Dolphin","Whale","Crab","Octopus","Jellyfish","Frog","Snake",
+      "Mouse","Deer","Bear","Fox","Wolf","Zebra"
     ]
   },
   "Food": {
@@ -301,9 +391,9 @@ const CATEGORIES = {
   "Fruits": {
     emoji: "🍎",
     words: [
-      "Apple","Avocado","Banana","Cherry","Coconut","Orange","Durian","Grape",
-      "Kiwi","Lychee","Mango","Melon","Papaya","Pear","Peach","Pineapple",
-      "Strawberry","Blueberry","Watermelon"
+      "Apple","Avocado","Banana","Cherry","Coconut","Orange","Durian","Grape","Guava","Jackfruit",
+      "Kiwi","Lychee","Mango","Mangosteen","Melon","Papaya","Pomelo","Pear","Peach","Pineapple",
+      "Strawberry","Blueberry","Watermelon","Plum","Passion Fruit","Longan"
     ]
   },
   "Vegetables": {
@@ -400,10 +490,7 @@ function nextWord() {
   
   // Reset UI
   els.input.value = '';
-  
-  // ★★★ แก้ไขตรงนี้: กำหนดให้พิมพ์ได้ไม่เกินความยาวของคำ ★★★
-  els.input.maxLength = state.word.length; 
-  
+  els.input.maxLength = state.word.length; // Lock input length
   els.input.focus();
   
   // Reset Hint Button
@@ -421,17 +508,17 @@ function renderWord() {
   const display = state.word.split('').map((char, i) => {
     if (char === ' ') return '&nbsp;'; 
 
-    // 1. ถ้าตรงนี้เป็นคำใบ้ที่เปิดแล้ว
+    // 1. Hint
     if (state.revealed[i]) {
-        return `<span style="color:#4facfe">${char}</span>`;
+        return `<span style="color:#0984e3">${char}</span>`;
     }
     
-    // 2. ถ้า User พิมพ์มา
+    // 2. User input
     if (userGuess[i]) {
         return userGuess[i]; 
     }
 
-    // 3. ถ้ายังไม่พิมพ์
+    // 3. Empty
     return '_';
   }).join(' ');
 
@@ -453,7 +540,7 @@ function startTimer() {
 function updateTimerUI() {
   els.timer.innerText = state.timer;
   if(state.timer <= 10) els.timer.style.color = 'red';
-  else els.timer.style.color = 'var(--text-main)';
+  else els.timer.style.color = '#2d3436';
 }
 
 function useHint() {
@@ -483,14 +570,14 @@ function checkGuess() {
     state.score += 10;
     state.timer += 5; 
     els.score.innerText = state.score;
-    showFeedback(true, `Correct! It is "${state.word}"`);
+    showFeedback(true, `ถูกต้อง! คำตอบคือ "${state.word}"`);
     setTimeout(() => {
       nextWord();
-    }, 1000);
+    }, 1500);
   } else {
     // Wrong
     els.input.classList.add('shake');
-    showFeedback(false, 'Try again!');
+    showFeedback(false, 'ยังไม่ถูก ลองใหม่นะ!');
     setTimeout(() => els.input.classList.remove('shake'), 400);
     els.input.focus();
   }
@@ -517,8 +604,8 @@ function finishGame(win) {
 
   els.finalScore.innerText = state.score;
   document.getElementById('resultEmoji').innerText = state.score > 0 ? '🏆' : '😅';
-  document.getElementById('resultTitle').innerText = state.score > 0 ? 'Awesome!' : 'Time Up!';
-  document.getElementById('resultMsg').innerText = `The answer was "${state.word}"`;
+  document.getElementById('resultTitle').innerText = state.score > 0 ? 'สุดยอด!' : 'เวลาหมดแล้ว';
+  document.getElementById('resultMsg').innerText = `คำตอบสุดท้ายคือ "${state.word}"`;
   
   switchScreen('result');
 }
@@ -534,7 +621,7 @@ function endGame() {
 // --- Event Listeners ---
 document.getElementById('submitBtn').addEventListener('click', checkGuess);
 
-// Update display immediately on type
+// Real-time update
 els.input.addEventListener('input', () => {
     renderWord();
 });
