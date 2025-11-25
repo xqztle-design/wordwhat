@@ -101,7 +101,6 @@
     padding: 10px 20px;
     font-size: 0.95rem;
   }
-  /* Style for disabled hint button */
   .btn.hint:disabled {
     background: #dfe6e9;
     color: #b2bec3;
@@ -131,7 +130,7 @@
     border-color: #4facfe;
   }
   .cat-emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
-  .cat-name { font-weight: 600; color: var(--text-main); }
+  .cat-name { font-weight: 600; color: var(--text-main); font-size: 0.95rem;}
 
   /* Game Screen */
   .top-bar {
@@ -147,14 +146,16 @@
   .timer-badge { font-weight: bold; color: var(--danger); display: flex; align-items: center; gap: 5px;}
 
   .word-display {
-    font-size: 2.8rem;
-    letter-spacing: 8px;
+    font-size: 2.5rem;
+    letter-spacing: 6px;
     font-weight: 600;
     color: var(--text-main);
     margin: 30px 0;
     min-height: 60px;
     font-family: 'Fredoka', var(--font-main);
     text-transform: uppercase;
+    word-break: break-word;
+    line-height: 1.2;
   }
 
   .input-area {
@@ -207,7 +208,7 @@
 
   @media (max-width: 480px) {
     .card { padding: 20px; }
-    .word-display { font-size: 2rem; letter-spacing: 4px; }
+    .word-display { font-size: 1.8rem; letter-spacing: 3px; }
     h1 { font-size: 1.8rem; }
     .btn { padding: 12px 20px; font-size: 1rem; }
   }
@@ -219,7 +220,7 @@
   
   <div id="homeScreen" class="card animate-pop">
     <div class="logo-area">
-      <div style="font-size: 3rem; margin-bottom: 10px;">🦁🍎🚗</div>
+      <div style="font-size: 3rem; margin-bottom: 10px;">🦁🍔🎒</div>
       <h1>Word What?</h1>
       <p class="subtitle">เกมทายคำศัพท์ภาษาอังกฤษ</p>
     </div>
@@ -278,51 +279,47 @@
 </div>
 
 <script>
-// --- Data: 20 English Words per Category ---
+// --- Data: Updated Categories ---
 const CATEGORIES = {
   "Animals": {
-    emoji: "🐶",
+    emoji: "🦁",
     words: [
-      "Elephant","Horse","Dog","Cat","Rabbit",
-      "Bird","Fish","Turtle","Monkey","Frog",
-      "Mouse","Lion","Tiger","Giraffe","Pig",
-      "Duck","Chicken","Cow","Sheep","Bear"
+      "Cow","Duck","Tiger","Fish","Bat","Cat","Dog","Chicken","Spider","Horse",
+      "Buffalo","Bee","Rabbit","Pig","Sheep","Flamingo","Lion","Giraffe","Penguin","Panda",
+      "Bird","Butterfly","Shark","Dolphin","Whale","Crab","Octopus","Jellyfish","Frog","Snake",
+      "Mouse","Deer","Bear","Fox","Wolf","Zebra"
     ]
   },
   "Food": {
     emoji: "🍔",
     words: [
-      "Salad","Noodle","Pizza","Bread","Soup",
-      "Steak","Burger","Sandwich","Fries","Ice Cream",
-      "Donut","Sushi","Cake","Cookie","Chocolate",
-      "Popcorn","Juice","Milk","Egg","Cheese"
+      "Hamburger","Pizza","Cheese","Bread","Bacon","Milk","Muffin","Omelette","Pancake","Toast",
+      "Yogurt","Doughnut","Hot Dog","Ice Cream","Popcorn","Taco","Noodle","Milkshake","Apple Pie","Orange Juice",
+      "Fried Egg","Cereal","Sandwich","Salad","Steak","Pork","Fried Rice","Curry","Cake","Sauce",
+      "Soup","Meatball","Pasta"
     ]
   },
   "Fruits": {
     emoji: "🍎",
     words: [
-      "Mango","Banana","Watermelon","Pineapple","Orange",
-      "Grape","Apple","Papaya","Lemon","Kiwi",
-      "Durian","Coconut","Strawberry","Cherry","Peach",
-      "Pear","Avocado","Melon","Berry","Plum"
+      "Apple","Avocado","Banana","Cherry","Coconut","Orange","Durian","Grape","Guava","Jackfruit",
+      "Kiwi","Lychee","Mango","Mangosteen","Melon","Papaya","Pomelo","Pear","Peach","Pineapple",
+      "Strawberry","Blueberry","Watermelon","Plum","Passion Fruit","Longan"
     ]
   },
-  "Objects": {
-    emoji: "✏️",
+  "Vegetables": {
+    emoji: "🥦",
     words: [
-      "Pencil","Eraser","Ruler","Notebook","Bag",
-      "Shoe","Sock","Cup","Plate","Spoon",
-      "Fork","Comb","Soap","Towel","Pillow",
-      "Clock","Scissors","Glasses","Phone","Lamp"
+      "Corn","Bean","Bell Pepper","Mushroom","Broccoli","Carrot","Chilli","Cucumber","Celery","Garlic",
+      "Ginger","Onion","Lemon","Peanut","Pepper","Potato","Pumpkin","Tomato"
     ]
   },
-  "Vehicles": {
-    emoji: "🚀",
+  "School Supplies": {
+    emoji: "🎒",
     words: [
-      "Car","Bike","Train","Plane","Boat",
-      "Van","Bus","Rocket","Helicopter","Motorcycle",
-      "Submarine","Balloon","Ambulance","Taxi","Truck",
-      "Scooter","Tractor","Ship","Jeep","UFO"
+      "Eraser","Pen","Pencil","Chalk","Paper","Book","Blackboard","Ruler","Folder","Marker",
+      "Ink","Cutter","Bookmark","Pencil Lead","Bin","Drawer","Printer","Notebook","Crayon","Palette",
+      "White Board","Sandpaper","Stapler"
     ]
   }
 };
@@ -406,7 +403,7 @@ function nextWord() {
   els.input.value = '';
   els.input.focus();
   
-  // !!! รีเซ็ตปุ่มคำใบ้ทุกครั้งที่ขึ้นคำใหม่ !!!
+  // Reset Hint Button
   els.hintBtn.disabled = false;
   els.hintBtn.style.opacity = 1;
   els.hintBtn.innerText = '💡 ขอคำใบ้'; 
@@ -442,7 +439,6 @@ function updateTimerUI() {
 }
 
 function useHint() {
-  // Check if unrevealed
   const unrevealedIndices = state.word.split('').map((c, i) => ({c, i}))
     .filter(item => !state.revealed[item.i] && item.c !== ' ');
   
@@ -452,7 +448,7 @@ function useHint() {
     renderWord();
     els.input.focus();
 
-    // !!! ปิดปุ่มหลังจากกดใช้ 1 ครั้ง !!!
+    // Disable button after 1 use
     els.hintBtn.disabled = true;
     els.hintBtn.style.opacity = 0.5;
     els.hintBtn.innerText = 'ใช้แล้ว';
@@ -463,7 +459,6 @@ function checkGuess() {
   const guess = els.input.value.trim();
   if (!guess) return;
 
-  // เปรียบเทียบแบบไม่สนตัวพิมพ์เล็ก/ใหญ่ และตัดช่องว่างออก
   if (guess.replace(/\s+/g,'').toLowerCase() === state.word.replace(/\s+/g,'').toLowerCase()) {
     // Correct
     state.score += 10;
