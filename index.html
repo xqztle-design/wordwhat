@@ -412,11 +412,29 @@ function nextWord() {
   renderWord();
 }
 
+// ★★★ จุดที่แก้ไข: ฟังก์ชันแสดงผลคำศัพท์ ★★★
 function renderWord() {
+  // ดึงค่าที่ user พิมพ์อยู่ตอนนี้มา (แปลงเป็นตัวพิมพ์ใหญ่)
+  const userGuess = els.input.value.toUpperCase();
+  
   const display = state.word.split('').map((char, i) => {
     if (char === ' ') return '&nbsp;'; 
-    return state.revealed[i] ? char : '_';
+
+    // 1. ถ้าตรงนี้เป็นคำใบ้ที่เปิดแล้ว ให้โชว์คำใบ้ (ล็อกไว้)
+    if (state.revealed[i]) {
+        return `<span style="color:#4facfe">${char}</span>`;
+    }
+    
+    // 2. ถ้า User พิมพ์มาถึงตรงนี้ ให้โชว์ตัวที่ User พิมพ์
+    // (แต่ต้องระวังไม่ให้เกินความยาวคำ)
+    if (userGuess[i]) {
+        return userGuess[i]; // แสดงตัวที่พิมพ์
+    }
+
+    // 3. ถ้ายังไม่พิมพ์ ให้เป็นขีด
+    return '_';
   }).join(' ');
+
   els.wordBox.innerHTML = display;
 }
 
@@ -445,6 +463,8 @@ function useHint() {
   if (unrevealedIndices.length > 0) {
     const randomItem = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
     state.revealed[randomItem.i] = true;
+    
+    // อัปเดตหน้าจอทันที
     renderWord();
     els.input.focus();
 
@@ -473,7 +493,7 @@ function checkGuess() {
     els.input.classList.add('shake');
     showFeedback(false, 'Try again!');
     setTimeout(() => els.input.classList.remove('shake'), 400);
-    els.input.value = '';
+    // ไม่ลบข้อความออกเพื่อให้แก้คำผิดได้ง่ายขึ้น (User Friendly)
     els.input.focus();
   }
 }
@@ -515,6 +535,12 @@ function endGame() {
 
 // --- Event Listeners ---
 document.getElementById('submitBtn').addEventListener('click', checkGuess);
+
+// ★★★ จุดที่แก้ไข: เพิ่ม Event 'input' เพื่อให้ทำงานตอนพิมพ์ทันที ★★★
+els.input.addEventListener('input', () => {
+    renderWord(); // อัปเดตขีดข้างบนทันทีที่พิมพ์
+});
+
 els.input.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') checkGuess();
 });
