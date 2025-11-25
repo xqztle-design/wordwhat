@@ -279,7 +279,7 @@
 </div>
 
 <script>
-// --- Data: Updated Categories ---
+// --- Data: Categories ---
 const CATEGORIES = {
   "Animals": {
     emoji: "🦁",
@@ -401,6 +401,10 @@ function nextWord() {
   
   // Reset UI
   els.input.value = '';
+  
+  // ★★★ แก้ไขตรงนี้: กำหนดให้พิมพ์ได้ไม่เกินความยาวของคำ ★★★
+  els.input.maxLength = state.word.length; 
+  
   els.input.focus();
   
   // Reset Hint Button
@@ -412,26 +416,23 @@ function nextWord() {
   renderWord();
 }
 
-// ★★★ จุดที่แก้ไข: ฟังก์ชันแสดงผลคำศัพท์ ★★★
 function renderWord() {
-  // ดึงค่าที่ user พิมพ์อยู่ตอนนี้มา (แปลงเป็นตัวพิมพ์ใหญ่)
   const userGuess = els.input.value.toUpperCase();
   
   const display = state.word.split('').map((char, i) => {
     if (char === ' ') return '&nbsp;'; 
 
-    // 1. ถ้าตรงนี้เป็นคำใบ้ที่เปิดแล้ว ให้โชว์คำใบ้ (ล็อกไว้)
+    // 1. ถ้าตรงนี้เป็นคำใบ้ที่เปิดแล้ว
     if (state.revealed[i]) {
         return `<span style="color:#4facfe">${char}</span>`;
     }
     
-    // 2. ถ้า User พิมพ์มาถึงตรงนี้ ให้โชว์ตัวที่ User พิมพ์
-    // (แต่ต้องระวังไม่ให้เกินความยาวคำ)
+    // 2. ถ้า User พิมพ์มา
     if (userGuess[i]) {
-        return userGuess[i]; // แสดงตัวที่พิมพ์
+        return userGuess[i]; 
     }
 
-    // 3. ถ้ายังไม่พิมพ์ ให้เป็นขีด
+    // 3. ถ้ายังไม่พิมพ์
     return '_';
   }).join(' ');
 
@@ -464,7 +465,6 @@ function useHint() {
     const randomItem = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
     state.revealed[randomItem.i] = true;
     
-    // อัปเดตหน้าจอทันที
     renderWord();
     els.input.focus();
 
@@ -493,7 +493,6 @@ function checkGuess() {
     els.input.classList.add('shake');
     showFeedback(false, 'Try again!');
     setTimeout(() => els.input.classList.remove('shake'), 400);
-    // ไม่ลบข้อความออกเพื่อให้แก้คำผิดได้ง่ายขึ้น (User Friendly)
     els.input.focus();
   }
 }
@@ -536,9 +535,9 @@ function endGame() {
 // --- Event Listeners ---
 document.getElementById('submitBtn').addEventListener('click', checkGuess);
 
-// ★★★ จุดที่แก้ไข: เพิ่ม Event 'input' เพื่อให้ทำงานตอนพิมพ์ทันที ★★★
+// Update display immediately on type
 els.input.addEventListener('input', () => {
-    renderWord(); // อัปเดตขีดข้างบนทันทีที่พิมพ์
+    renderWord();
 });
 
 els.input.addEventListener('keypress', (e) => {
