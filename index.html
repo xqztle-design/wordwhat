@@ -1,329 +1,568 @@
-<!doctype html> <html lang="th"> <head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /> <title>Word What? เกมทายคำศัพท์</title> <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Fredoka:wght@600&display=swap" rel="stylesheet">
+<!doctype html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Word What? เกมทายคำศัพท์</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Fredoka:wght@600&display=swap" rel="stylesheet">
 
 <style>
-  /* --- 1. Variables & Reset (ตัวแปรและการรีเซ็ตค่าเริ่มต้น) --- */
-  :root { /* กำหนดตัวแปร CSS (CSS Variables) ที่ใช้ได้ทั่วทั้งเอกสาร */
-    --primary: #FF9F1C; /* สีส้มหลักของธีมเกม */
-    --text-dark: #2d3436; /* สีเทาเข้มสำหรับข้อความทั่วไป */
-    --text-muted: #636e72; /* สีเทาอ่อนสำหรับข้อความรอง */
-    --radius: 25px; /* รัศมีความโค้งของมุมกรอบต่างๆ */
-    --font-main: 'Kanit', sans-serif; /* ชื่อฟอนต์หลักที่ใช้ (Kanit) */
+  /* --- ส่วนตกแต่งหน้าตา (CSS) --- */
+  :root {
+    --primary: #FF9F1C;
+    --text-dark: #2d3436;
+    --text-muted: #636e72;
+    --radius: 25px;
+    --font-main: 'Kanit', sans-serif;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; } /* รีเซ็ตค่า margin, padding ของทุก element เป็น 0 และกำหนดการคำนวณขนาดกล่องรวมขอบ */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   
-  body { /* สไตล์สำหรับ body ของหน้าเว็บ */
-    font-family: var(--font-main); /* ใช้ฟอนต์ที่กำหนดไว้ในตัวแปร */
-    height: 100vh; overflow: hidden; /* ความสูงเต็มหน้าจอ และซ่อนส่วนที่เกิน (ไม่ให้เลื่อน scrollbar) */
-    display: flex; align-items: center; justify-content: center; /* จัดเนื้อหาให้อยู่กึ่งกลางหน้าจอทั้งแนวตั้งและแนวนอน */
-    padding: 16px; color: var(--text-dark); /* ระยะห่างขอบ 16px และสีตัวอักษรหลัก */
+  body {
+    font-family: var(--font-main);
+    height: 100vh; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; color: var(--text-dark);
   }
 
-  /* --- 2. Background Scene (ฉากหลัง) --- */
-  .scene { /* คลาสสำหรับฉากหลัง */
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; /* ตรึงตำแหน่งเต็มหน้าจอ และให้อยู่ชั้นหลังสุด (z-index: -1) */
-    background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 60%, #a8e063 60%, #56ab2f 100%); /* ไล่สีพื้นหลังทำเป็นท้องฟ้าและหญ้า */
+  /* ฉากหลัง */
+  .scene {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+    background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 60%, #a8e063 60%, #56ab2f 100%);
   }
-  .cloud { position: absolute; opacity: 0.8; animation: floatCloud 25s linear infinite; } /* สไตล์ก้อนเมฆ: ลอยได้ (animation) โปร่งแสงนิดหน่อย */
-  .c1 { top: 10%; left: -10%; font-size: 5rem; } /* เมฆก้อนที่ 1: ตำแหน่งและขนาด */
-  .c2 { top: 20%; left: -20%; font-size: 3rem; animation-duration: 35s; animation-delay: 5s; opacity: 0.6; } /* เมฆก้อนที่ 2: ตำแหน่ง, ขนาด และความเร็ว animation ที่ต่างกัน */
+  .cloud { position: absolute; opacity: 0.8; animation: floatCloud 25s linear infinite; }
+  .c1 { top: 10%; left: -10%; font-size: 5rem; }
+  .c2 { top: 20%; left: -20%; font-size: 3rem; animation-duration: 35s; animation-delay: 5s; opacity: 0.6; }
   
-  .prop { position: absolute; bottom: 36%; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2)); } /* พร็อพประกอบฉาก (ต้นไม้, สัตว์) วางอยู่ด้านล่าง มีเงา */
-  .tree-1 { left: -20px; font-size: 8rem; bottom: 35%; z-index: 0; } /* ต้นไม้ซ้าย */
-  .tree-2 { right: -20px; font-size: 7rem; z-index: 0; } /* ต้นไม้ขวา */
-  .char-1 { left: 15%; font-size: 5rem; animation: bounce 3s infinite ease-in-out; bottom: 37%; } /* สัตว์ตัวที่ 1 (ยีราฟ) เคลื่อนไหวเด้งๆ */
-  .char-2 { right: 15%; font-size: 4.5rem; animation: bounce 4s infinite ease-in-out; animation-delay: 1s; transform: scaleX(-1); } /* สัตว์ตัวที่ 2 (ช้าง) กลับด้านรูปและเด้งๆ */
-  .char-3 { left: 50%; margin-left: -150px; font-size: 3rem; bottom: 39%; animation: bounce 2s infinite; } /* สัตว์ตัวที่ 3 (กระต่าย) เด้งๆ ตรงกลาง */
+  .prop { position: absolute; bottom: 36%; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
+  .tree-1 { left: -20px; font-size: 8rem; bottom: 35%; z-index: 0; }
+  .tree-2 { right: -20px; font-size: 7rem; z-index: 0; }
+  .char-1 { left: 15%; font-size: 5rem; animation: bounce 3s infinite ease-in-out; bottom: 37%; }
+  .char-2 { right: 15%; font-size: 4.5rem; animation: bounce 4s infinite ease-in-out; animation-delay: 1s; transform: scaleX(-1); }
+  .char-3 { left: 50%; margin-left: -150px; font-size: 3rem; bottom: 39%; animation: bounce 2s infinite; }
 
-  /* --- 3. UI Components (ส่วนประกอบหน้าจอ) --- */
-  .container { width: 100%; max-width: 550px; margin: 0 auto; position: relative; z-index: 10; } /* กล่องคอนเทนเนอร์หลัก จัดกึ่งกลาง ความกว้างสูงสุด 550px */
+  /* กล่อง UI */
+  .container { width: 100%; max-width: 550px; margin: 0 auto; position: relative; z-index: 10; }
 
-  .card { /* การ์ดสีขาวสำหรับแสดงเนื้อหาแต่ละหน้า */
-    background: rgba(255, 255, 255, 0.95); /* สีพื้นหลังขาวโปร่งแสง */
-    border-radius: var(--radius); padding: 30px; /* มุมโค้งและระยะห่างภายใน */
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15); text-align: center; /* เงาตกกระทบและจัดข้อความกึ่งกลาง */
-    border: 4px solid #fff; backdrop-filter: blur(5px); /* ขอบสีขาวและเบลอพื้นหลังด้านหลังการ์ด */
-    display: none; /* ซ่อนไว้ก่อน (จะแสดงเมื่อมีคลาส active) */
-    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* อนิเมชั่นเด้งขึ้นมาเมื่อแสดงผล */
+  .card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius); padding: 30px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15); text-align: center;
+    border: 4px solid #fff; backdrop-filter: blur(5px);
+    display: none; /* ซ่อนไว้ก่อน */
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .card.active { display: block; } /* ถ้ามีคลาส active ให้แสดงการ์ดนั้นแบบ block */
+  .card.active { display: block; } /* แสดงเมื่อมีคลาส active */
 
-  h1 { /* หัวข้อหลัก H1 */
-    font-family: 'Fredoka', var(--font-main); font-size: 2.5rem; color: var(--primary); /* ฟอนต์ Fredoka, ขนาดใหญ่, สีส้ม */
-    text-shadow: 2px 2px 0px #fff; margin-bottom: 8px; /* เงาตัวอักษรและระยะห่างด้านล่าง */
+  h1 {
+    font-family: 'Fredoka', var(--font-main); font-size: 2.5rem; color: var(--primary);
+    text-shadow: 2px 2px 0px #fff; margin-bottom: 8px;
   }
-  .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 10px;} /* คำอธิบายรอง สีเทา */
+  .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 10px;}
 
-  .btn { /* ปุ่มกดทั่วไป */
-    background: var(--primary); color: white; border: none; /* พื้นหลังสีส้ม ตัวอักษรขาว ไม่มีเส้นขอบ */
-    padding: 12px 24px; border-radius: 50px; font-size: 1.1rem; /* ระยะห่างภายใน มุมโค้งมน ขนาดตัวอักษร */
-    font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 #e67e22; /* ตัวหนา เมาส์เป็นรูปมือ เงาปุ่มแบบ 3D */
-    transition: transform 0.1s; font-family: var(--font-main); /* เอฟเฟกต์เปลี่ยนรูปและฟอนต์ */
-    display: inline-block; min-width: 120px; margin: 5px; /* แสดงเป็นบล็อกแนวนอน ความกว้างขั้นต่ำ */
+  .btn {
+    background: var(--primary); color: white; border: none;
+    padding: 12px 24px; border-radius: 50px; font-size: 1.1rem;
+    font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 #e67e22;
+    transition: transform 0.1s; font-family: var(--font-main);
+    display: inline-block; min-width: 120px; margin: 5px;
   }
-  .btn:active { transform: translateY(5px); box-shadow: none; } /* เวลากดปุ่ม ปุ่มยุบลงและเงาหายไป */
-  .btn.secondary { background: #dfe6e9; color: var(--text-muted); box-shadow: 0 5px 0 #b2bec3; } /* ปุ่มรอง สีเทา */
-  .btn.secondary:active { box-shadow: none; } /* เวลากดปุ่มรอง */
-  .music-btn { /* ปุ่มเปิด/ปิดเพลง */
-    position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; /* ตำแหน่งมุมขวาบน ขนาด 40x40 */
-    border-radius: 50%; border: none; background: #f1f2f6; font-size: 1.2rem; /* วงกลม สีพื้นเทาอ่อน */
-    cursor: pointer; z-index: 20; box-shadow: 0 3px 0 #ccc; /* เมาส์มือ อยู่ชั้นบนสุด มีเงา */
+  .btn:active { transform: translateY(5px); box-shadow: none; }
+  .btn.secondary { background: #dfe6e9; color: var(--text-muted); box-shadow: 0 5px 0 #b2bec3; }
+  .btn.secondary:active { box-shadow: none; }
+  .music-btn {
+    position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
+    border-radius: 50%; border: none; background: #f1f2f6; font-size: 1.2rem;
+    cursor: pointer; z-index: 20; box-shadow: 0 3px 0 #ccc;
   }
 
-  /* --- 4. Game Specifics (ส่วนเฉพาะของเกม) --- */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 20px; } /* ตารางแสดงหมวดหมู่ */
-  .cat-card { /* การ์ดหมวดหมู่ */
-    background: #fff; border: 3px solid #f1f2f6; border-radius: 20px; /* พื้นขาว ขอบเทา */
-    padding: 15px; cursor: pointer; transition: 0.2s; /* ระยะห่าง เอฟเฟกต์เวลาชี้ */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 20px; }
+  .cat-card {
+    background: #fff; border: 3px solid #f1f2f6; border-radius: 20px;
+    padding: 15px; cursor: pointer; transition: 0.2s;
   }
-  .cat-card:hover { background: #fff3cd; border-color: var(--primary); transform: translateY(-5px); } /* เวลาเมาส์ชี้ เปลี่ยนสีและลอยขึ้น */
+  .cat-card:hover { background: #fff3cd; border-color: var(--primary); transform: translateY(-5px); }
 
-  .top-bar { /* แถบด้านบนแสดงคะแนนและเวลา */
-    display: flex; justify-content: space-between; background: #def4fc; /* จัดซ้ายขวา พื้นหลังฟ้าอ่อน */
-    padding: 10px 20px; border-radius: 50px; margin-bottom: 20px; border: 2px solid #bce6f7; /* ระยะห่าง มุมมน ขอบฟ้า */
+  .top-bar {
+    display: flex; justify-content: space-between; background: #def4fc;
+    padding: 10px 20px; border-radius: 50px; margin-bottom: 20px; border: 2px solid #bce6f7;
   }
-  .word-display { /* ส่วนแสดงคำศัพท์ (โจทย์) */
-    font-family: 'Fredoka', sans-serif; font-size: 2.8rem; letter-spacing: 5px; /* ฟอนต์ใหญ่ ระยะห่างตัวอักษร */
-    font-weight: 800; color: var(--text-dark); margin: 20px 0; /* ตัวหนามาก สีเข้ม */
-    text-transform: uppercase; word-break: break-word; /* ตัวพิมพ์ใหญ่ทั้งหมด ตัดคำเมื่อสุดบรรทัด */
+  .word-display {
+    font-family: 'Fredoka', sans-serif; font-size: 2.8rem; letter-spacing: 5px;
+    font-weight: 800; color: var(--text-dark); margin: 20px 0;
+    text-transform: uppercase; word-break: break-word;
   }
-  .hint-bubble { /* กล่องคำใบ้ */
-    background: #fff3cd; color: #856404; border: 2px solid #ffeeba; /* พื้นเหลือง ตัวอักษรน้ำตาล ขอบเหลืองเข้ม */
-    border-radius: 15px; padding: 10px; margin-bottom: 20px; /* มุมมน ระยะห่าง */
-    font-size: 1rem; font-weight: 600; /* ขนาดตัวอักษร ตัวหนา */
+  .hint-bubble {
+    background: #fff3cd; color: #856404; border: 2px solid #ffeeba;
+    border-radius: 15px; padding: 10px; margin-bottom: 20px;
+    font-size: 1rem; font-weight: 600;
   }
-  input[type="text"] { /* ช่องกรอกคำตอบ */
-    width: 100%; max-width: 350px; padding: 14px; border: 3px solid #dfe6e9; /* กว้างเต็ม ขอบเทา */
-    border-radius: 20px; font-size: 1.3rem; text-align: center; outline: none; /* มุมมน ตัวหนังสือใหญ่ จัดกลาง */
-    font-family: var(--font-main); background: #fdfdfd; margin-bottom: 10px; /* ฟอนต์ไทย พื้นหลังเกือบขาว */
+  input[type="text"] {
+    width: 100%; max-width: 350px; padding: 14px; border: 3px solid #dfe6e9;
+    border-radius: 20px; font-size: 1.3rem; text-align: center; outline: none;
+    font-family: var(--font-main); background: #fdfdfd; margin-bottom: 10px;
   }
-  input[type="text"]:focus { border-color: var(--primary); background: #fff; } /* เวลาพิมพ์ เปลี่ยนขอบเป็นสีส้ม */
+  input[type="text"]:focus { border-color: var(--primary); background: #fff; }
 
-  .feedback { margin-top: 15px; padding: 10px; border-radius: 10px; font-weight: 600; display: none; } /* กล่องข้อความตอบกลับ (ถูก/ผิด) ซ่อนไว้ก่อน */
-  .feedback.correct { background: #d4edda; color: #155724; } /* สไตล์เมื่อตอบถูก (สีเขียว) */
-  .feedback.wrong { background: #f8d7da; color: #721c24; } /* สไตล์เมื่อตอบผิด (สีแดง) */
+  .feedback { margin-top: 15px; padding: 10px; border-radius: 10px; font-weight: 600; display: none; }
+  .feedback.correct { background: #d4edda; color: #155724; }
+  .feedback.wrong { background: #f8d7da; color: #721c24; }
 
-  /* --- 5. Animations & Mobile (อนิเมชั่นและการปรับแต่งมือถือ) --- */
-  @keyframes floatCloud { 0% { transform: translateX(0); } 100% { transform: translateX(120vw); } } /* เมฆลอยจากซ้ายไปขวา */
-  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } } /* เด้งขึ้นลง */
-  @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } } /* เด้งขยายขนาดเมื่อปรากฏ */
-  .shake { animation: shake 0.3s; } /* คลาสสำหรับสั่งให้สั่น */
-  @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} } /* การสั่นซ้ายขวา */
+  @keyframes floatCloud { 0% { transform: translateX(0); } 100% { transform: translateX(120vw); } }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  .shake { animation: shake 0.3s; }
+  @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
 
-  @media (max-width: 480px) { /* ถ้าหน้าจอเล็กกว่า 480px (มือถือ) */
-    .word-display { font-size: 2rem; letter-spacing: 2px; } /* ลดขนาดตัวอักษรโจทย์ */
-    h1 { font-size: 2rem; } /* ลดขนาดหัวข้อ */
-    .prop { font-size: 3rem; } .tree-1 { left: -40px; } .tree-2 { right: -40px; } /* ปรับขนาดและตำแหน่งพร็อพประกอบฉาก */
+  @media (max-width: 480px) {
+    .word-display { font-size: 2rem; letter-spacing: 2px; }
+    h1 { font-size: 2rem; }
+    .prop { font-size: 3rem; } .tree-1 { left: -40px; } .tree-2 { right: -40px; }
   }
 </style>
 </head>
 <body>
 
-<div class="scene"> <div class="cloud c1">☁️</div> <div class="cloud c2">☁️</div> <div class="prop tree-1">🌳</div> <div class="prop tree-2">🌲</div> <div class="prop char-1">🦒</div> <div class="prop char-2">🐘</div> <div class="prop char-3">🐇</div> </div>
+<div class="scene">
+  <div class="cloud c1">☁️</div> <div class="cloud c2">☁️</div>
+  <div class="prop tree-1">🌳</div> <div class="prop tree-2">🌲</div>
+  <div class="prop char-1">🦒</div> <div class="prop char-2">🐘</div> <div class="prop char-3">🐇</div>
+</div>
 
-<div class="container"> <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔇</button> <div id="homeScreen" class="card active"> <div style="font-size: 4rem; margin-bottom: 10px;">🦁🍔🎒</div> <h1>Word What?</h1> <p class="subtitle">เกมทายคำศัพท์ภาษาอังกฤษ</p> <button class="btn" onclick="clickSound(); showCategories()">เริ่มเล่นเกม</button> <p style="margin-top: 20px; font-size: 0.9rem; color: #b2bec3;">High Score: <span id="highScore">0</span></p> </div>
+<div class="container">
+  
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔇</button>
 
-  <div id="categoryScreen" class="card"> <h2>เลือกหมวดคำศัพท์</h2>
-    <div class="grid" id="categoryGrid"></div> <div style="margin-top: 20px;">
-      <button class="btn secondary" onclick="clickSound(); switchScreen('homeScreen')">กลับ</button> </div>
+  <div id="homeScreen" class="card active">
+    <div style="font-size: 4rem; margin-bottom: 10px;">🦁🍔🎒</div>
+    <h1>Word What?</h1>
+    <p class="subtitle">เกมทายคำศัพท์ภาษาอังกฤษ</p>
+    <button class="btn" onclick="playClickSound(); goToCategoryScreen()">เริ่มเล่นเกม</button>
+    <p style="margin-top: 20px; font-size: 0.9rem; color: #b2bec3;">
+       High Score: <span id="highScore">0</span>
+    </p>
   </div>
 
-  <div id="gameScreen" class="card"> <div class="top-bar"> <span style="color: #0984e3; font-weight: bold;">SCORE: <span id="currentScore">0</span></span> <span style="color: #d63031; font-weight: bold;">⏰ <span id="timerDisplay">60</span></span> </div>
-    
-    <div class="subtitle">หมวด: <span id="displayCategory">...</span></div> <div id="wordBox" class="word-display">_ _ _ _ _</div> <div id="hintBubble" class="hint-bubble">💡 ...</div> <div>
-      <input type="text" id="guessInput" placeholder="พิมพ์คำตอบ..." autocomplete="off"> <button class="btn" style="width:100%" onclick="checkGuess()">ส่งคำตอบ</button> <button class="btn secondary" style="width:100%" onclick="clickSound(); endGame()">ยอมแพ้</button> </div>
-    <div id="feedback" class="feedback"></div> </div>
+  <div id="categoryScreen" class="card">
+    <h2>เลือกหมวดคำศัพท์</h2>
+    <div class="grid" id="categoryGrid"></div>
+    <div style="margin-top: 20px;">
+      <button class="btn secondary" onclick="playClickSound(); goToHomeScreen()">กลับ</button>
+    </div>
+  </div>
 
-  <div id="resultScreen" class="card"> <div style="font-size: 5rem;" id="resultEmoji">🎉</div> <h2>จบเกม!</h2>
-    <div style="background: #def4fc; padding: 15px; border-radius: 15px; margin: 15px 0;"> <p>คะแนนที่ได้</p>
-      <h1 style="color: #0984e3; margin: 0;" id="finalScore">0</h1> </div>
-    <button class="btn" onclick="clickSound(); showCategories()">เล่นอีกครั้ง</button> <button class="btn secondary" onclick="clickSound(); switchScreen('homeScreen')">หน้าหลัก</button> </div>
+  <div id="gameScreen" class="card">
+    <div class="top-bar">
+      <span style="color: #0984e3; font-weight: bold;">SCORE: <span id="currentScore">0</span></span>
+      <span style="color: #d63031; font-weight: bold;">⏰ <span id="timerDisplay">60</span></span>
+    </div>
+    
+    <div class="subtitle">หมวด: <span id="displayCategory">...</span></div>
+    
+    <div id="wordBox" class="word-display">_ _ _ _ _</div>
+    
+    <div id="hintBubble" class="hint-bubble">💡 ...</div>
+    
+    <div>
+      <input type="text" id="guessInput" placeholder="พิมพ์คำตอบ..." autocomplete="off">
+      <button class="btn" style="width:100%" onclick="checkAnswer()">ส่งคำตอบ</button>
+      <button class="btn secondary" style="width:100%" onclick="playClickSound(); gameOver()">ยอมแพ้</button>
+    </div>
+    
+    <div id="feedback" class="feedback"></div>
+  </div>
+
+  <div id="resultScreen" class="card">
+    <div style="font-size: 5rem;" id="resultEmoji">🎉</div>
+    <h2>จบเกม!</h2>
+    <div style="background: #def4fc; padding: 15px; border-radius: 15px; margin: 15px 0;">
+      <p>คะแนนที่ได้</p>
+      <h1 style="color: #0984e3; margin: 0;" id="finalScore">0</h1>
+    </div>
+    <button class="btn" onclick="playClickSound(); goToCategoryScreen()">เล่นอีกครั้ง</button>
+    <button class="btn secondary" onclick="playClickSound(); goToHomeScreen()">หน้าหลัก</button>
+  </div>
+
 </div>
 
 <script>
-// --- 1. System & Sound (ระบบและเสียง) ---
-const sounds = { // สร้างออบเจกต์เก็บเสียงต่างๆ
-  bgm: new Audio('bgm.mp3'), // เสียงเพลงพื้นหลัง
-  click: new Audio('click.mp3'), // เสียงคลิก
-  correct: new Audio('Correct.mp3'), // เสียงตอบถูก (C ตัวใหญ่)
-  wrong: new Audio('Wrong.mp3'), // เสียงตอบผิด (W ตัวใหญ่)
-  win: new Audio('win.mp3') // เสียงชนะ/จบเกม
-};
-sounds.bgm.loop = true; // ตั้งให้เพลงพื้นหลังเล่นวนลูป
-sounds.bgm.volume = 0.3; // ปรับความดังเพลงพื้นหลังลดลงเหลือ 30%
+// --- ส่วนที่ 1: เตรียมตัวแปร (Variables) ---
 
-let isMusicOn = false; // ตัวแปรเก็บสถานะว่าเปิดเพลงอยู่หรือไม่ (เริ่มต้นปิด)
+// สร้างตัวแปรเสียง เตรียมเอาไว้ใช้
+var bgmSound = new Audio('bgm.mp3');
+var clickSound = new Audio('click.mp3');
+var correctSound = new Audio('correct.mp3'); 
+var wrongSound = new Audio('wrong.mp3');     
+var winSound = new Audio('win.mp3');
 
-function toggleMusic() { // ฟังก์ชันสลับเปิด/ปิดเพลง
-  const btn = document.getElementById('musicBtn'); // ดึงปุ่มเพลงมา
-  isMusicOn = !isMusicOn; // สลับค่าสถานะ (จริง/เท็จ)
-  if (isMusicOn) { // ถ้าเปิดเพลง
-    btn.innerText = "🔊"; // เปลี่ยนไอคอนเป็นลำโพงดัง
-    sounds.bgm.play().catch(() => { // สั่งเล่นเพลง
-      alert("ไม่พบไฟล์ bgm.mp3"); // ถ้าเล่นไม่ได้ (หาไฟล์ไม่เจอ) ให้แจ้งเตือน
-      isMusicOn = false; btn.innerText = "🔇"; // ปรับสถานะกลับเป็นปิด
-    });
-  } else { // ถ้าปิดเพลง
-    btn.innerText = "🔇"; // เปลี่ยนไอคอนเป็นปิดเสียง
-    sounds.bgm.pause(); // หยุดเพลง
-  }
-}
-function clickSound() { sounds.click.currentTime=0; sounds.click.play().catch(()=>{}); } // ฟังก์ชันเล่นเสียงคลิก (รีเซ็ตเวลาเป็น 0 เพื่อให้กดรัวๆ ได้)
+bgmSound.loop = true;
+bgmSound.volume = 0.3;
 
-// --- 2. Game State & Logic (สถานะและตรรกะเกม) ---
-let state = { category: null, wordObj: null, score: 0, timer: 60, interval: null, revealed: [] }; // ออบเจกต์เก็บสถานะเกมปัจจุบัน (หมวด, คำศัพท์, คะแนน, เวลา, ตัวจับเวลา, ตัวอักษรที่เปิดเผย)
+// ตัวแปรเก็บสถานะว่าเปิดเพลงอยู่ไหม (เริ่มมาให้ปิดไว้ก่อน)
+var isMusicPlaying = false;
 
-function switchScreen(id) { // ฟังก์ชันสลับหน้าจอ
-  document.querySelectorAll('.card').forEach(el => el.classList.remove('active')); // วนลูปซ่อนการ์ดทุกใบ (เอาคลาส active ออก)
-  document.getElementById(id).classList.add('active'); // แสดงการ์ดที่ต้องการ (ใส่คลาส active)
-}
+// ตัวแปรสำหรับเกม
+var currentCategory = "";     // เก็บหมวดหมู่ที่เลือก
+var currentWord = "";         // เก็บคำศัพท์ปัจจุบัน
+var currentHint = "";         // เก็บคำใบ้ปัจจุบัน
+var score = 0;                // เก็บลูกคะแนน
+var timeLeft = 60;            // เก็บเวลาที่เหลือ (เริ่มที่ 60 วินาที)
+var timerInterval = null;     // ตัวควบคุมเวลา (เอาไว้สั่งหยุดเวลา)
+var revealedChars = [];       // เก็บว่าตัวอักษรไหนเปิดแล้วบ้าง
 
-function showCategories() { // ฟังก์ชันแสดงหน้าเลือกหมวดหมู่
-  const grid = document.getElementById('categoryGrid'); // ดึง element ตารางหมวดหมู่
-  grid.innerHTML = ''; // เคลียร์เนื้อหาเก่า
-  Object.keys(CATEGORIES).forEach(key => { // วนลูปตามหมวดหมู่ที่มีใน CATEGORIES
-    const div = document.createElement('div'); // สร้าง div ใหม่
-    div.className = 'cat-card'; // ใส่คลาสการ์ดหมวดหมู่
-    div.innerHTML = `<div style="font-size:2.5rem">${CATEGORIES[key].emoji}</div><b>${key}</b>`; // ใส่ไอคอนและชื่อหมวด
-    div.onclick = () => { clickSound(); startGame(key); }; // เมื่อคลิก ให้เล่นเสียงและเริ่มเกมหมวดนั้น
-    grid.appendChild(div); // เพิ่ม div ลงในตาราง
-  });
-  switchScreen('categoryScreen'); // สลับไปหน้าเลือกหมวดหมู่
-}
+// --- ส่วนที่ 2: ฟังก์ชันเกี่ยวกับเสียง ---
 
-function startGame(catKey) { // ฟังก์ชันเริ่มเกมใหม่
-  state.category = catKey; // บันทึกหมวดหมู่ที่เลือก
-  state.score = 0; // รีเซ็ตคะแนน
-  state.timer = 60; // รีเซ็ตเวลา
-  
-  document.getElementById('currentScore').innerText = 0; // แสดงคะแนน 0
-  document.getElementById('displayCategory').innerText = catKey; // แสดงชื่อหมวด
-  
-  nextWord(); // สุ่มคำศัพท์คำแรก
-  startTimer(); // เริ่มจับเวลา
-  switchScreen('gameScreen'); // สลับไปหน้าเล่นเกม
-}
-
-function nextWord() { // ฟังก์ชันสุ่มคำถัดไป
-  const list = CATEGORIES[state.category].items; // ดึงรายการคำศัพท์ในหมวดนั้น
-  state.wordObj = list[Math.floor(Math.random() * list.length)]; // สุ่มเลือกมา 1 คำ
-  const word = state.wordObj.w; // เก็บคำศัพท์ลงตัวแปร word
-
-  // Logic สุ่มเปิดตัวอักษรใบ้
-  state.revealed = new Array(word.length).fill(false); // สร้างอาร์เรย์เก็บสถานะเปิด/ปิดตัวอักษร (เริ่มต้นปิดหมด)
-  if (word.length > 2) { // ถ้าคำยาวกว่า 2 ตัวอักษร
-    // สุ่มเปิด 1-2 ตัว
-    let numReveal = Math.floor(Math.random() * 2) + 1; // สุ่มจำนวนที่จะเปิด
-    for(let i=0; i<numReveal; i++) { // วนลูปตามจำนวน
-        let rIdx = Math.floor(Math.random() * word.length); // สุ่มตำแหน่ง
-        if(word[rIdx] !== ' ') state.revealed[rIdx] = true; // ถ้าไม่ใช่ช่องว่าง ให้เปิดตัวอักษรตำแหน่งนั้น
+// ฟังก์ชันสำหรับเปิด/ปิดเพลง
+function toggleMusic() {
+    var btn = document.getElementById('musicBtn');
+    
+    // ตรวจสอบว่าเพลงเปิดอยู่ไหม ถ้าเปิดให้ปิด ถ้าปิดให้เปิด
+    if (isMusicPlaying == true) {
+        // สั่งหยุดเพลง
+        bgmSound.pause();
+        // เปลี่ยนสถานะเป็นปิด
+        isMusicPlaying = false;
+        // เปลี่ยนรูปไอคอนเป็นปิดเสียง
+        btn.innerText = "🔇";
+    } else {
+        // สั่งเล่นเพลง
+        bgmSound.play().catch(function() {
+             alert("หาไฟล์ bgm.mp3 ไม่เจอครับ หรือ Browser บล็อกเสียงไว้");
+        });
+        // เปลี่ยนสถานะเป็นเปิด
+        isMusicPlaying = true;
+        // เปลี่ยนรูปไอคอนเป็นเปิดเสียง
+        btn.innerText = "🔊";
     }
-  }
-
-  // UI Reset (รีเซ็ตหน้าจอ)
-  const input = document.getElementById('guessInput'); // ดึงช่องกรอก
-  input.value = ''; // ล้างค่า
-  input.maxLength = word.length; // กำหนดความยาวสูงสุดเท่ากับคำศัพท์
-  input.focus(); // ให้เคอร์เซอร์ไปอยู่ที่ช่องกรอก
-  
-  document.getElementById('hintBubble').innerText = '💡 คำใบ้: ' + state.wordObj.h; // แสดงคำใบ้
-  document.getElementById('feedback').style.display = 'none'; // ซ่อนกล่องข้อความตอบกลับ
-  
-  renderWordDisplay(); // แสดงผลคำศัพท์บนหน้าจอ
 }
 
-function renderWordDisplay() { // ฟังก์ชันวาดคำศัพท์บนหน้าจอ
-  const inputVal = document.getElementById('guessInput').value.toUpperCase(); // ดึงค่าที่ผู้เล่นพิมพ์ (เป็นตัวพิมพ์ใหญ่)
-  const target = state.wordObj.w.toUpperCase(); // ดึงคำตอบที่ถูกต้อง (เป็นตัวพิมพ์ใหญ่)
-  
-  let html = ''; // ตัวแปรเก็บ HTML ที่จะแสดง
-  for (let i = 0; i < target.length; i++) { // วนลูปทีละตัวอักษร
-    const char = target[i];
-    if (char === ' ') { // ถ้าเป็นช่องว่าง
-      html += '&nbsp;'; // ให้เว้นวรรค
-    } else if (state.revealed[i]) { // ถ้าเป็นตัวที่ระบบสุ่มเปิดให้
-      html += `<span style="color:#0984e3">${char}</span>`; // แสดงตัวอักษรสีฟ้า
-    } else if (inputVal[i]) { // ถ้าผู้เล่นพิมพ์มาแล้ว
-      html += inputVal[i]; // แสดงตัวที่ผู้เล่นพิมพ์
-    } else { // ถ้ายังไม่พิมพ์และไม่ได้เปิด
-      html += '_'; // แสดงขีดล่าง
+// ฟังก์ชันเล่นเสียงคลิก (แยกออกมาจะได้เรียกใช้ง่ายๆ)
+function playClickSound() {
+    clickSound.currentTime = 0; // รีเซ็ตเสียงให้เริ่มใหม่ทันที
+    clickSound.play();
+}
+
+// --- ส่วนที่ 3: ฟังก์ชันเปลี่ยนหน้าจอ ---
+
+// ฟังก์ชันซ่อนทุกหน้า แล้วเปิดเฉพาะหน้า Home
+function goToHomeScreen() {
+    // สั่งหยุดเวลา (กันเหนียว)
+    clearInterval(timerInterval);
+    
+    // ซ่อนทุกหน้าก่อน (ลบคลาส active ออก)
+    document.getElementById('homeScreen').classList.remove('active');
+    document.getElementById('categoryScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.remove('active');
+    document.getElementById('resultScreen').classList.remove('active');
+
+    // โชว์หน้า Home (เติมคลาส active)
+    document.getElementById('homeScreen').classList.add('active');
+    
+    // โหลดคะแนนสูงสุดมาโชว์
+    var savedScore = localStorage.getItem('ww_highscore');
+    // ถ้าไม่มีคะแนนเก่า ให้แสดงเป็น 0
+    if (savedScore == null) {
+        savedScore = 0;
     }
-  }
-  document.getElementById('wordBox').innerHTML = html; // นำ HTML ไปใส่ในกล่องแสดงคำ
+    document.getElementById('highScore').innerText = savedScore;
 }
 
-function checkGuess() { // ฟังก์ชันตรวจคำตอบ
-  const input = document.getElementById('guessInput'); // ดึงช่องกรอก
-  const val = input.value.trim(); // ดึงค่าและตัดช่องว่างหน้าหลัง
-  const target = state.wordObj.w; // คำตอบที่ถูกต้อง
-  const fb = document.getElementById('feedback'); // กล่อง feedback
+// ฟังก์ชันไปหน้าเลือกหมวด
+function goToCategoryScreen() {
+    // ซ่อนทุกหน้าก่อน
+    document.getElementById('homeScreen').classList.remove('active');
+    document.getElementById('categoryScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.remove('active');
+    document.getElementById('resultScreen').classList.remove('active');
 
-  if (!val) return; // ถ้าไม่ได้พิมพ์อะไรมา ให้จบฟังก์ชัน
+    // โชว์หน้าเลือกหมวด
+    document.getElementById('categoryScreen').classList.add('active');
 
-  if (val.toLowerCase().replace(/\s/g,'') === target.toLowerCase().replace(/\s/g,'')) { // เปรียบเทียบคำตอบ (ตัดช่องว่างและทำเป็นตัวพิมพ์เล็ก)
-    // ถูกต้อง
-    sounds.correct.play().catch(()=>{}); // เล่นเสียงถูกต้อง
-    state.score += 10; // เพิ่มคะแนน
-    state.timer += 5; // บวกเวลาเพิ่ม 5 วินาที
-    document.getElementById('currentScore').innerText = state.score; // อัปเดตคะแนนบนจอ
-    
-    fb.innerText = `ถูกต้อง! คำตอบคือ "${target}"`; // แสดงข้อความชม
-    fb.className = 'feedback correct'; // ใส่คลาสสีเขียว
-    fb.style.display = 'block'; // แสดงกล่อง
-    
-    setTimeout(nextWord, 1500); // อีก 1.5 วินาที ให้ไปคำถัดไป
-  } else {
-    // ผิด
-    sounds.wrong.play().catch(()=>{}); // เล่นเสียงผิด
-    input.classList.add('shake'); // สั่นช่องกรอก
-    fb.innerText = 'ยังไม่ถูก ลองใหม่นะ!'; // แสดงข้อความเตือน
-    fb.className = 'feedback wrong'; // ใส่คลาสสีแดง
-    fb.style.display = 'block'; // แสดงกล่อง
-    
-    setTimeout(() => input.classList.remove('shake'), 400); // หยุดสั่นหลังจาก 0.4 วินาที
-    input.focus(); // ให้เคอร์เซอร์กลับไปที่ช่องกรอก
-  }
+    // สร้างปุ่มหมวดหมู่
+    createCategoryButtons();
 }
 
-function startTimer() { // ฟังก์ชันเริ่มนับเวลา
-  clearInterval(state.interval); // เคลียร์ตัวจับเวลาเก่าก่อน
-  const timerEl = document.getElementById('timerDisplay'); // ดึง element แสดงเวลา
-  
-  state.interval = setInterval(() => { // ตั้งเวลาทำงานทุก 1 วินาที
-    state.timer--; // ลดเวลาลงทีละ 1
-    timerEl.innerText = state.timer; // อัปเดตตัวเลขบนจอ
-    timerEl.style.color = state.timer <= 10 ? 'red' : '#d63031'; // ถ้าเหลือน้อยกว่า 10 วิ ให้ตัวเลขเป็นสีแดง
+// ฟังก์ชันสร้างปุ่มหมวดหมู่
+function createCategoryButtons() {
+    var grid = document.getElementById('categoryGrid');
+    grid.innerHTML = ""; // ล้างปุ่มเก่าทิ้งก่อน
+
+    // วนลูปสร้างปุ่มทีละหมวด
+    for (var key in CATEGORIES) {
+        // สร้างกล่อง div
+        var btn = document.createElement('div');
+        btn.className = 'cat-card';
+        
+        // เอาข้อมูลหมวดหมู่ออกมา
+        var catData = CATEGORIES[key];
+        
+        // ใส่รูปและข้อความลงไป
+        btn.innerHTML = '<div style="font-size:2.5rem">' + catData.emoji + '</div><b>' + key + '</b>';
+        
+        // เก็บชื่อหมวดไว้ในปุ่ม เพื่อให้รู้ว่ากดอันไหน (ใช้ Closure แบบง่ายๆ โดยการ set attribute onclick)
+        // วิธีนี้อาจจะไม่ Best Practice แต่เข้าใจง่ายสำหรับมือใหม่ คือฝังคำสั่งลงไปเลย
+        btn.setAttribute("onclick", "playClickSound(); startGame('" + key + "')");
+        
+        // เอาปุ่มไปใส่ในตาราง
+        grid.appendChild(btn);
+    }
+}
+
+// --- ส่วนที่ 4: ฟังก์ชันเริ่มเกม และ การเล่น ---
+
+// ฟังก์ชันเริ่มเกม (รับชื่อหมวดมา)
+function startGame(categoryName) {
+    // จำหมวดที่เลือกไว้
+    currentCategory = categoryName;
+    // รีเซ็ตคะแนนเป็น 0
+    score = 0;
+    // รีเซ็ตเวลาเป็น 60
+    timeLeft = 60;
     
-    if (state.timer <= 0) endGame(); // ถ้าเวลาหมด ให้จบเกม
-  }, 1000); // 1000 มิลลิวินาที = 1 วินาที
+    // อัปเดตตัวเลขคะแนนบนหน้าจอ
+    document.getElementById('currentScore').innerText = 0;
+    // อัปเดตชื่อหมวดบนหน้าจอ
+    document.getElementById('displayCategory').innerText = categoryName;
+
+    // สลับไปหน้าจอเล่นเกม
+    document.getElementById('categoryScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.add('active');
+
+    // สุ่มคำแรก
+    nextWord();
+    // เริ่มจับเวลา
+    startTimer();
 }
 
-function endGame() { // ฟังก์ชันจบเกม
-  clearInterval(state.interval); // หยุดนับเวลา
-  
-  // Save High Score (บันทึกคะแนนสูงสุด)
-  const oldHigh = parseInt(localStorage.getItem('ww_highscore') || '0'); // ดึงคะแนนเก่าจากเครื่อง
-  if (state.score > oldHigh) localStorage.setItem('ww_highscore', state.score); // ถ้าคะแนนใหม่มากกว่า ให้บันทึกทับ
-  
-  document.getElementById('highScore').innerText = Math.max(oldHigh, state.score); // แสดงคะแนนสูงสุด
-  document.getElementById('finalScore').innerText = state.score; // แสดงคะแนนที่ทำได้
-  
-  state.score > 0 ? sounds.win.play().catch(()=>{}) : sounds.wrong.play().catch(()=>{}); // ถ้ามีคะแนนให้เล่นเสียงชนะ ถ้า 0 ให้เล่นเสียงผิด
-  
-  switchScreen('resultScreen'); // สลับไปหน้าสรุปผล
+// ฟังก์ชันสุ่มคำถัดไป
+function nextWord() {
+    // ดึงรายการคำศัพท์ทั้งหมดของหมวดนั้นมา
+    var wordList = CATEGORIES[currentCategory].items;
+    
+    // สุ่มตัวเลข (ตั้งแต่ 0 ถึง จำนวนคำทั้งหมด)
+    var randomIndex = Math.floor(Math.random() * wordList.length);
+    
+    // เอาคำศัพท์และคำใบ้ออกมา
+    var selectedObj = wordList[randomIndex];
+    currentWord = selectedObj.w;
+    currentHint = selectedObj.h;
+
+    // --- ระบบสุ่มเปิดตัวอักษร ---
+    // สร้าง Array ว่างๆ เท่าความยาวของคำ
+    revealedChars = [];
+    for (var i = 0; i < currentWord.length; i++) {
+        revealedChars[i] = false; // เริ่มต้นคือยังไม่เปิด (false)
+    }
+
+    // ถ้าคำยาวกว่า 4 ตัว ให้เปิดใบ้สักหน่อย
+    if (currentWord.length >= 4) {
+        var amountToReveal = Math.floor(Math.random() * 2) + 1;
+        
+        // วนลูปเพื่อเปิดตัวอักษร
+        for (var j = 0; j < amountToReveal; j++) {
+            // สุ่มตำแหน่งที่จะเปิด
+            var randomPos = Math.floor(Math.random() * currentWord.length);
+            // ถ้าไม่ใช่ช่องว่าง ให้เปิด (เปลี่ยนเป็น true)
+            if (currentWord[randomPos] !== ' ') {
+                revealedChars[randomPos] = true;
+            }
+        }
+    }
+
+    // --- รีเซ็ตหน้าจอ ---
+    // ล้างช่องคำตอบ
+    var input = document.getElementById('guessInput');
+    input.value = "";
+    // จำกัดให้พิมพ์ได้ไม่เกินความยาวคำ
+    input.maxLength = currentWord.length;
+    // ให้เมาส์ไปกระพริบที่ช่องพิมพ์
+    input.focus();
+
+    // แสดงคำใบ้
+    document.getElementById('hintBubble').innerText = '💡 คำใบ้: ' + currentHint;
+    // ซ่อนกล่องข้อความแจ้งเตือน (ถูก/ผิด) ไปก่อน
+    document.getElementById('feedback').style.display = 'none';
+
+    // วาดขีด _ _ _ บนหน้าจอ
+    drawWord();
 }
 
-// --- 3. Events (เหตุการณ์ต่างๆ) ---
-document.getElementById('guessInput').addEventListener('input', renderWordDisplay); // เมื่อพิมพ์ในช่องกรอก ให้อัปเดตคำบนหน้าจอทันที
-document.getElementById('guessInput').addEventListener('keypress', (e) => { // เมื่อกดปุ่มในช่องกรอก
-  if(e.key === 'Enter') checkGuess(); // ถ้าเป็นปุ่ม Enter ให้ตรวจคำตอบ
+// ฟังก์ชันวาดตัวอักษรและขีด _ บนหน้าจอ
+function drawWord() {
+    // ดึงค่าที่คนเล่นพิมพ์อยู่ในช่อง
+    var playerInput = document.getElementById('guessInput').value.toUpperCase();
+    // แปลงคำตอบจริงเป็นตัวพิมพ์ใหญ่หมดจะได้เทียบง่ายๆ
+    var correctWordUpper = currentWord.toUpperCase();
+    
+    var htmlToShow = "";
+
+    // วนลูปทีละตัวอักษร
+    for (var i = 0; i < correctWordUpper.length; i++) {
+        var char = correctWordUpper[i];
+
+        if (char === ' ') {
+            // ถ้าเป็นช่องว่าง ให้เว้นวรรค
+            htmlToShow = htmlToShow + '&nbsp;';
+        } else if (revealedChars[i] == true) {
+            // ถ้าเป็นตัวที่ระบบเปิดให้ (ตัวใบ้) ให้เป็นสีฟ้า
+            htmlToShow = htmlToShow + '<span style="color:#0984e3">' + char + '</span>';
+        } else if (playerInput[i]) {
+            // ถ้าคนเล่นพิมพ์ตัวนี้มาแล้ว ให้แสดงตัวที่พิมพ์
+            htmlToShow = htmlToShow + playerInput[i];
+        } else {
+            // ถ้ายังไม่พิมพ์ ให้แสดงขีด _
+            htmlToShow = htmlToShow + '_';
+        }
+    }
+
+    // เอา HTML ที่สร้างเสร็จไปใส่ในกล่อง
+    document.getElementById('wordBox').innerHTML = htmlToShow;
+}
+
+// ฟังก์ชันตรวจคำตอบ
+function checkAnswer() {
+    var input = document.getElementById('guessInput');
+    // เอาค่ามา ตัดช่องว่างหน้าหลังทิ้ง
+    var val = input.value.trim();
+    var feedbackBox = document.getElementById('feedback');
+
+    // ถ้าไม่ได้พิมพ์อะไรมาเลย ก็ไม่ต้องทำอะไร
+    if (val == "") {
+        return;
+    }
+
+    // แปลงเป็นตัวพิมพ์เล็ก และตัดช่องว่างออกให้หมด เพื่อเทียบคำตอบ
+    var cleanVal = val.toLowerCase().replace(/\s/g,'');
+    var cleanTarget = currentWord.toLowerCase().replace(/\s/g,'');
+
+    // เช็คว่าตรงกันไหม
+    if (cleanVal === cleanTarget) {
+        // --- ตอบถูก ---
+        correctSound.play(); // เล่นเสียงถูก
+        score = score + 10;  // บวกคะแนน
+        timeLeft = timeLeft + 5; // บวกเวลาเพิ่ม
+        
+        // อัปเดตคะแนน
+        document.getElementById('currentScore').innerText = score;
+        
+        // แสดงข้อความชม
+        feedbackBox.innerText = 'ถูกต้อง! คำตอบคือ "' + currentWord + '"';
+        feedbackBox.className = 'feedback correct'; // เปลี่ยนสีเป็นเขียว
+        feedbackBox.style.display = 'block';
+
+        // รอ 1.5 วินาที แล้วไปคำต่อไป
+        setTimeout(function() {
+            nextWord();
+        }, 1500);
+
+    } else {
+        // --- ตอบผิด ---
+        wrongSound.play(); // เล่นเสียงผิด
+        
+        // สั่งให้กล่องสั่น (เพิ่มคลาส shake)
+        input.classList.add('shake');
+        
+        // แสดงข้อความเตือน
+        feedbackBox.innerText = 'ยังไม่ถูก ลองใหม่นะ!';
+        feedbackBox.className = 'feedback wrong'; // เปลี่ยนสีเป็นแดง
+        feedbackBox.style.display = 'block';
+
+        // หยุดสั่นหลังจาก 0.4 วินาที
+        setTimeout(function() {
+            input.classList.remove('shake');
+        }, 400);
+
+        // ให้เมาส์กลับไปอยู่ที่ช่องพิมพ์
+        input.focus();
+    }
+}
+
+// ฟังก์ชันจับเวลา
+function startTimer() {
+    // ล้างตัวจับเวลาเก่าก่อน (ถ้ามี)
+    clearInterval(timerInterval);
+    
+    var timerElement = document.getElementById('timerDisplay');
+    
+    // ตั้งให้ทำงานทุกๆ 1 วินาที (1000 มิลลิวินาที)
+    timerInterval = setInterval(function() {
+        timeLeft = timeLeft - 1; // ลดเวลา
+        timerElement.innerText = timeLeft; // แสดงเวลา
+
+        // ถ้าเวลาน้อยกว่า 10 ให้ตัวเลขเป็นสีแดง
+        if (timeLeft <= 10) {
+            timerElement.style.color = 'red';
+        } else {
+            timerElement.style.color = '#d63031';
+        }
+
+        // ถ้าเวลาหมด (น้อยกว่าหรือเท่ากับ 0)
+        if (timeLeft <= 0) {
+            gameOver();
+        }
+    }, 1000);
+}
+
+// ฟังก์ชันจบเกม
+function gameOver() {
+    // หยุดจับเวลา
+    clearInterval(timerInterval);
+
+    // ซ่อนหน้าเกม
+    document.getElementById('gameScreen').classList.remove('active');
+    // โชว์หน้าจบเกม
+    document.getElementById('resultScreen').classList.add('active');
+
+    // จัดการเรื่องคะแนนสูงสุด
+    var oldHigh = localStorage.getItem('ww_highscore');
+    if (oldHigh == null) {
+        oldHigh = 0;
+    } else {
+        oldHigh = parseInt(oldHigh); // แปลงข้อความให้เป็นตัวเลข
+    }
+
+    // ถ้าคะแนนใหม่ มากกว่า คะแนนเก่า
+    if (score > oldHigh) {
+        // บันทึกคะแนนใหม่
+        localStorage.setItem('ww_highscore', score);
+    }
+
+    // แสดงคะแนนที่ได้
+    document.getElementById('finalScore').innerText = score;
+
+    // เล่นเสียงตอนจบ
+    if (score > 0) {
+        winSound.play();
+    } else {
+        wrongSound.play();
+    }
+}
+
+// --- ส่วนที่ 5: เหตุการณ์ (Events) ---
+
+// เมื่อมีการพิมพ์ในช่อง ให้เรียกฟังก์ชันวาดคำ (เพื่อให้ตัวหนังสือขึ้นไปบนขีด _)
+document.getElementById('guessInput').addEventListener('input', function() {
+    drawWord();
 });
 
-// Init (เริ่มต้นทำงาน)
-document.getElementById('highScore').innerText = localStorage.getItem('ww_highscore') || 0; // โหลดคะแนนสูงสุดมาแสดงตอนเปิดเว็บ
+// เมื่อกดปุ่ม Enter ในช่องพิมพ์ ให้ตรวจคำตอบ
+document.getElementById('guessInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        checkAnswer();
+    }
+});
 
-// --- 4. DATA (Categories) ข้อมูลหมวดหมู่และคำศัพท์ฉบับเต็ม ---
-const CATEGORIES = {
-  "Animals": { // หมวดสัตว์
+// เริ่มต้น: โหลดคะแนนสูงสุดมาโชว์
+var startScore = localStorage.getItem('ww_highscore');
+if (startScore == null) {
+    startScore = 0;
+}
+document.getElementById('highScore').innerText = startScore;
+
+
+// --- ส่วนข้อมูล (Data) ---
+// ข้อมูลหมวดหมู่และคำศัพท์ (ผมแยกออกมาไว้ล่างสุดจะได้ไม่งง)
+var CATEGORIES = {
+  "Animals": {
     emoji: "🦁",
     items: [
       { w: "Cow", h: "ร้อง มอ มอ กินหญ้า" }, { w: "Duck", h: "ร้อง ก้าบ ก้าบ" },
@@ -346,7 +585,7 @@ const CATEGORIES = {
       { w: "Wolf", h: "หมาป่า ร้อง บรู๊ววว" }, { w: "Zebra", h: "ม้าลาย ขาวสลับดำ" }
     ]
   },
-  "Food": { // หมวดอาหาร
+  "Food": {
     emoji: "🍔",
     items: [
       { w: "Hamburger", h: "ขนมปังประกบเนื้อ มีผัก" }, { w: "Pizza", h: "แป้งแผ่นกลม มีหน้าเยอะๆ" },
@@ -368,7 +607,7 @@ const CATEGORIES = {
       { w: "Pasta", h: "เส้นอิตาลี มักกะโรนี" }
     ]
   },
-  "Fruits": { // หมวดผลไม้
+  "Fruits": {
     emoji: "🍎",
     items: [
       { w: "Apple", h: "ผลสีแดง สโนว์ไวท์ชอบกิน" }, { w: "Avocado", h: "ผลสีเขียว เนื้อเนียนมัน" },
@@ -386,7 +625,7 @@ const CATEGORIES = {
       { w: "Passion Fruit", h: "เสาวรส เปรี้ยวจี๊ด" }, { w: "Longan", h: "ลำไย เม็ดในสีดำ" }
     ]
   },
-  "Vegetables": { // หมวดผัก
+  "Vegetables": {
     emoji: "🥦",
     items: [
       { w: "Corn", h: "ฝักสีเหลือง เม็ดเรียงสวย" }, { w: "Bean", h: "ถั่ว" },
@@ -400,7 +639,7 @@ const CATEGORIES = {
       { w: "Pumpkin", h: "ลูกฟักทอง วันฮาโลวีน" }, { w: "Tomato", h: "ลูกสีแดง ใส่ในซอสมะเขือเทศ" }
     ]
   },
-  "School Supplies": { // หมวดอุปกรณ์การเรียน
+  "School Supplies": {
     emoji: "🎒",
     items: [
       { w: "Eraser", h: "ใช้ลบคำผิด" }, { w: "Pen", h: "ปากกา ใช้น้ำหมึก" },
