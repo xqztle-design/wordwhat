@@ -174,6 +174,9 @@
   <div id="resultScreen" class="card">
     <div style="font-size: 5rem;" id="resultEmoji">🎉</div>
     <h2>จบเกม!</h2>
+    
+    <p style="font-size: 1.2rem; color: #d63031; margin-bottom: 10px;" id="answerText"></p>
+    
     <div style="background: #def4fc; padding: 15px; border-radius: 15px; margin: 15px 0;">
       <p>คะแนนที่ได้</p>
       <h1 style="color: #0984e3; margin: 0;" id="finalScore">0</h1>
@@ -185,9 +188,7 @@
 </div>
 
 <script>
-// --- ส่วนที่ 1: เตรียมตัวแปร (Variables) ---
-
-// สร้างตัวแปรเสียง เตรียมเอาไว้ใช้
+// --- ตัวแปร (Variables) ---
 var bgmSound = new Audio('bgm.mp3');
 var clickSound = new Audio('click.mp3');
 var correctSound = new Audio('correct.mp3'); 
@@ -196,371 +197,246 @@ var winSound = new Audio('win.mp3');
 
 bgmSound.loop = true;
 bgmSound.volume = 0.3;
-
-// ตัวแปรเก็บสถานะว่าเปิดเพลงอยู่ไหม (เริ่มมาให้ปิดไว้ก่อน)
 var isMusicPlaying = false;
 
-// ตัวแปรสำหรับเกม
-var currentCategory = "";     // เก็บหมวดหมู่ที่เลือก
-var currentWord = "";         // เก็บคำศัพท์ปัจจุบัน
-var currentHint = "";         // เก็บคำใบ้ปัจจุบัน
-var score = 0;                // เก็บลูกคะแนน
-var timeLeft = 60;            // เก็บเวลาที่เหลือ (เริ่มที่ 60 วินาที)
-var timerInterval = null;     // ตัวควบคุมเวลา (เอาไว้สั่งหยุดเวลา)
-var revealedChars = [];       // เก็บว่าตัวอักษรไหนเปิดแล้วบ้าง
+var currentCategory = "";     
+var currentWord = "";         
+var currentHint = "";         
+var score = 0;                
+var timeLeft = 60;            
+var timerInterval = null;     
+var revealedChars = [];       
 
-// --- ส่วนที่ 2: ฟังก์ชันเกี่ยวกับเสียง ---
+// ตัวแปรใหม่: เก็บรายการคำศัพท์ที่ "ยังเหลืออยู่" ในรอบนั้นๆ
+var availableWords = [];
 
-// ฟังก์ชันสำหรับเปิด/ปิดเพลง
+// --- ฟังก์ชันเกี่ยวกับเสียง ---
 function toggleMusic() {
     var btn = document.getElementById('musicBtn');
-    
-    // ตรวจสอบว่าเพลงเปิดอยู่ไหม ถ้าเปิดให้ปิด ถ้าปิดให้เปิด
     if (isMusicPlaying == true) {
-        // สั่งหยุดเพลง
         bgmSound.pause();
-        // เปลี่ยนสถานะเป็นปิด
         isMusicPlaying = false;
-        // เปลี่ยนรูปไอคอนเป็นปิดเสียง
         btn.innerText = "🔇";
     } else {
-        // สั่งเล่นเพลง
         bgmSound.play().catch(function() {
              alert("หาไฟล์ bgm.mp3 ไม่เจอครับ หรือ Browser บล็อกเสียงไว้");
         });
-        // เปลี่ยนสถานะเป็นเปิด
         isMusicPlaying = true;
-        // เปลี่ยนรูปไอคอนเป็นเปิดเสียง
         btn.innerText = "🔊";
     }
 }
 
-// ฟังก์ชันเล่นเสียงคลิก (แยกออกมาจะได้เรียกใช้ง่ายๆ)
 function playClickSound() {
-    clickSound.currentTime = 0; // รีเซ็ตเสียงให้เริ่มใหม่ทันที
+    clickSound.currentTime = 0;
     clickSound.play();
 }
 
-// --- ส่วนที่ 3: ฟังก์ชันเปลี่ยนหน้าจอ ---
-
-// ฟังก์ชันซ่อนทุกหน้า แล้วเปิดเฉพาะหน้า Home
+// --- ฟังก์ชันเปลี่ยนหน้าจอ ---
 function goToHomeScreen() {
-    // สั่งหยุดเวลา (กันเหนียว)
     clearInterval(timerInterval);
-    
-    // ซ่อนทุกหน้าก่อน (ลบคลาส active ออก)
     document.getElementById('homeScreen').classList.remove('active');
     document.getElementById('categoryScreen').classList.remove('active');
     document.getElementById('gameScreen').classList.remove('active');
     document.getElementById('resultScreen').classList.remove('active');
-
-    // โชว์หน้า Home (เติมคลาส active)
     document.getElementById('homeScreen').classList.add('active');
     
-    // โหลดคะแนนสูงสุดมาโชว์
     var savedScore = localStorage.getItem('ww_highscore');
-    // ถ้าไม่มีคะแนนเก่า ให้แสดงเป็น 0
-    if (savedScore == null) {
-        savedScore = 0;
-    }
+    if (savedScore == null) savedScore = 0;
     document.getElementById('highScore').innerText = savedScore;
 }
 
-// ฟังก์ชันไปหน้าเลือกหมวด
 function goToCategoryScreen() {
-    // ซ่อนทุกหน้าก่อน
     document.getElementById('homeScreen').classList.remove('active');
     document.getElementById('categoryScreen').classList.remove('active');
     document.getElementById('gameScreen').classList.remove('active');
     document.getElementById('resultScreen').classList.remove('active');
-
-    // โชว์หน้าเลือกหมวด
     document.getElementById('categoryScreen').classList.add('active');
-
-    // สร้างปุ่มหมวดหมู่
     createCategoryButtons();
 }
 
-// ฟังก์ชันสร้างปุ่มหมวดหมู่
 function createCategoryButtons() {
     var grid = document.getElementById('categoryGrid');
-    grid.innerHTML = ""; // ล้างปุ่มเก่าทิ้งก่อน
-
-    // วนลูปสร้างปุ่มทีละหมวด
+    grid.innerHTML = ""; 
     for (var key in CATEGORIES) {
-        // สร้างกล่อง div
         var btn = document.createElement('div');
         btn.className = 'cat-card';
-        
-        // เอาข้อมูลหมวดหมู่ออกมา
         var catData = CATEGORIES[key];
-        
-        // ใส่รูปและข้อความลงไป
         btn.innerHTML = '<div style="font-size:2.5rem">' + catData.emoji + '</div><b>' + key + '</b>';
-        
-        // เก็บชื่อหมวดไว้ในปุ่ม เพื่อให้รู้ว่ากดอันไหน (ใช้ Closure แบบง่ายๆ โดยการ set attribute onclick)
-        // วิธีนี้อาจจะไม่ Best Practice แต่เข้าใจง่ายสำหรับมือใหม่ คือฝังคำสั่งลงไปเลย
         btn.setAttribute("onclick", "playClickSound(); startGame('" + key + "')");
-        
-        // เอาปุ่มไปใส่ในตาราง
         grid.appendChild(btn);
     }
 }
 
-// --- ส่วนที่ 4: ฟังก์ชันเริ่มเกม และ การเล่น ---
-
-// ฟังก์ชันเริ่มเกม (รับชื่อหมวดมา)
+// --- ฟังก์ชันเริ่มเกม และ การเล่น ---
 function startGame(categoryName) {
-    // จำหมวดที่เลือกไว้
     currentCategory = categoryName;
-    // รีเซ็ตคะแนนเป็น 0
     score = 0;
-    // รีเซ็ตเวลาเป็น 60
     timeLeft = 60;
     
-    // อัปเดตตัวเลขคะแนนบนหน้าจอ
+    // สำคัญ: ก๊อปปี้รายการคำศัพท์ทั้งหมดมาใส่ availableWords ตอนเริ่มเกม
+    // ใช้ slice(0) เพื่อให้ได้ "สำเนา" (ไม่ใช่ตัวจริง) จะได้ตัดคำออกได้โดยไม่กระทบข้อมูลหลัก
+    availableWords = CATEGORIES[categoryName].items.slice(0);
+
     document.getElementById('currentScore').innerText = 0;
-    // อัปเดตชื่อหมวดบนหน้าจอ
     document.getElementById('displayCategory').innerText = categoryName;
 
-    // สลับไปหน้าจอเล่นเกม
     document.getElementById('categoryScreen').classList.remove('active');
     document.getElementById('gameScreen').classList.add('active');
 
-    // สุ่มคำแรก
     nextWord();
-    // เริ่มจับเวลา
     startTimer();
 }
 
-// ฟังก์ชันสุ่มคำถัดไป
 function nextWord() {
-    // ดึงรายการคำศัพท์ทั้งหมดของหมวดนั้นมา
-    var wordList = CATEGORIES[currentCategory].items;
+    // เช็คว่าคำหมดหรือยัง? ถ้าหมดแล้ว ให้เติมใหม่ (เล่นวน)
+    if (availableWords.length == 0) {
+        // เติมคำศัพท์ใหม่ทั้งหมด
+        availableWords = CATEGORIES[currentCategory].items.slice(0);
+    }
+
+    // สุ่มจาก availableWords (รายการที่เหลืออยู่) แทนรายการหลัก
+    var randomIndex = Math.floor(Math.random() * availableWords.length);
+    var selectedObj = availableWords[randomIndex];
     
-    // สุ่มตัวเลข (ตั้งแต่ 0 ถึง จำนวนคำทั้งหมด)
-    var randomIndex = Math.floor(Math.random() * wordList.length);
-    
-    // เอาคำศัพท์และคำใบ้ออกมา
-    var selectedObj = wordList[randomIndex];
+    // เอาคำที่เลือกแล้ว ออกจากรายการ availableWords
+    // (คำสั่ง splice ใช้ตัดข้อมูลใน Array)
+    availableWords.splice(randomIndex, 1);
+
     currentWord = selectedObj.w;
     currentHint = selectedObj.h;
 
-    // --- ระบบสุ่มเปิดตัวอักษร ---
-    // สร้าง Array ว่างๆ เท่าความยาวของคำ
+    // ระบบสุ่มเปิดตัวอักษร
     revealedChars = [];
     for (var i = 0; i < currentWord.length; i++) {
-        revealedChars[i] = false; // เริ่มต้นคือยังไม่เปิด (false)
+        revealedChars[i] = false;
     }
-
-    // ถ้าคำยาวกว่า 4 ตัว ให้เปิดใบ้สักหน่อย
     if (currentWord.length >= 4) {
         var amountToReveal = Math.floor(Math.random() * 2) + 1;
-        
-        // วนลูปเพื่อเปิดตัวอักษร
         for (var j = 0; j < amountToReveal; j++) {
-            // สุ่มตำแหน่งที่จะเปิด
             var randomPos = Math.floor(Math.random() * currentWord.length);
-            // ถ้าไม่ใช่ช่องว่าง ให้เปิด (เปลี่ยนเป็น true)
             if (currentWord[randomPos] !== ' ') {
                 revealedChars[randomPos] = true;
             }
         }
     }
 
-    // --- รีเซ็ตหน้าจอ ---
-    // ล้างช่องคำตอบ
     var input = document.getElementById('guessInput');
     input.value = "";
-    // จำกัดให้พิมพ์ได้ไม่เกินความยาวคำ
     input.maxLength = currentWord.length;
-    // ให้เมาส์ไปกระพริบที่ช่องพิมพ์
     input.focus();
 
-    // แสดงคำใบ้
     document.getElementById('hintBubble').innerText = '💡 คำใบ้: ' + currentHint;
-    // ซ่อนกล่องข้อความแจ้งเตือน (ถูก/ผิด) ไปก่อน
     document.getElementById('feedback').style.display = 'none';
 
-    // วาดขีด _ _ _ บนหน้าจอ
     drawWord();
 }
 
-// ฟังก์ชันวาดตัวอักษรและขีด _ บนหน้าจอ
 function drawWord() {
-    // ดึงค่าที่คนเล่นพิมพ์อยู่ในช่อง
     var playerInput = document.getElementById('guessInput').value.toUpperCase();
-    // แปลงคำตอบจริงเป็นตัวพิมพ์ใหญ่หมดจะได้เทียบง่ายๆ
     var correctWordUpper = currentWord.toUpperCase();
-    
     var htmlToShow = "";
 
-    // วนลูปทีละตัวอักษร
     for (var i = 0; i < correctWordUpper.length; i++) {
         var char = correctWordUpper[i];
-
         if (char === ' ') {
-            // ถ้าเป็นช่องว่าง ให้เว้นวรรค
             htmlToShow = htmlToShow + '&nbsp;';
         } else if (revealedChars[i] == true) {
-            // ถ้าเป็นตัวที่ระบบเปิดให้ (ตัวใบ้) ให้เป็นสีฟ้า
             htmlToShow = htmlToShow + '<span style="color:#0984e3">' + char + '</span>';
         } else if (playerInput[i]) {
-            // ถ้าคนเล่นพิมพ์ตัวนี้มาแล้ว ให้แสดงตัวที่พิมพ์
             htmlToShow = htmlToShow + playerInput[i];
         } else {
-            // ถ้ายังไม่พิมพ์ ให้แสดงขีด _
             htmlToShow = htmlToShow + '_';
         }
     }
-
-    // เอา HTML ที่สร้างเสร็จไปใส่ในกล่อง
     document.getElementById('wordBox').innerHTML = htmlToShow;
 }
 
-// ฟังก์ชันตรวจคำตอบ
 function checkAnswer() {
     var input = document.getElementById('guessInput');
-    // เอาค่ามา ตัดช่องว่างหน้าหลังทิ้ง
     var val = input.value.trim();
     var feedbackBox = document.getElementById('feedback');
 
-    // ถ้าไม่ได้พิมพ์อะไรมาเลย ก็ไม่ต้องทำอะไร
-    if (val == "") {
-        return;
-    }
+    if (val == "") return;
 
-    // แปลงเป็นตัวพิมพ์เล็ก และตัดช่องว่างออกให้หมด เพื่อเทียบคำตอบ
     var cleanVal = val.toLowerCase().replace(/\s/g,'');
     var cleanTarget = currentWord.toLowerCase().replace(/\s/g,'');
 
-    // เช็คว่าตรงกันไหม
     if (cleanVal === cleanTarget) {
-        // --- ตอบถูก ---
-        correctSound.play(); // เล่นเสียงถูก
-        score = score + 10;  // บวกคะแนน
-        timeLeft = timeLeft + 5; // บวกเวลาเพิ่ม
-        
-        // อัปเดตคะแนน
+        correctSound.play();
+        score = score + 10;
+        timeLeft = timeLeft + 5;
         document.getElementById('currentScore').innerText = score;
         
-        // แสดงข้อความชม
         feedbackBox.innerText = 'ถูกต้อง! คำตอบคือ "' + currentWord + '"';
-        feedbackBox.className = 'feedback correct'; // เปลี่ยนสีเป็นเขียว
+        feedbackBox.className = 'feedback correct';
         feedbackBox.style.display = 'block';
 
-        // รอ 1.5 วินาที แล้วไปคำต่อไป
         setTimeout(function() {
             nextWord();
         }, 1500);
-
     } else {
-        // --- ตอบผิด ---
-        wrongSound.play(); // เล่นเสียงผิด
-        
-        // สั่งให้กล่องสั่น (เพิ่มคลาส shake)
+        wrongSound.play();
         input.classList.add('shake');
-        
-        // แสดงข้อความเตือน
         feedbackBox.innerText = 'ยังไม่ถูก ลองใหม่นะ!';
-        feedbackBox.className = 'feedback wrong'; // เปลี่ยนสีเป็นแดง
+        feedbackBox.className = 'feedback wrong';
         feedbackBox.style.display = 'block';
 
-        // หยุดสั่นหลังจาก 0.4 วินาที
         setTimeout(function() {
             input.classList.remove('shake');
         }, 400);
-
-        // ให้เมาส์กลับไปอยู่ที่ช่องพิมพ์
         input.focus();
     }
 }
 
-// ฟังก์ชันจับเวลา
 function startTimer() {
-    // ล้างตัวจับเวลาเก่าก่อน (ถ้ามี)
     clearInterval(timerInterval);
-    
     var timerElement = document.getElementById('timerDisplay');
-    
-    // ตั้งให้ทำงานทุกๆ 1 วินาที (1000 มิลลิวินาที)
     timerInterval = setInterval(function() {
-        timeLeft = timeLeft - 1; // ลดเวลา
-        timerElement.innerText = timeLeft; // แสดงเวลา
+        timeLeft = timeLeft - 1;
+        timerElement.innerText = timeLeft;
 
-        // ถ้าเวลาน้อยกว่า 10 ให้ตัวเลขเป็นสีแดง
-        if (timeLeft <= 10) {
-            timerElement.style.color = 'red';
-        } else {
-            timerElement.style.color = '#d63031';
-        }
+        if (timeLeft <= 10) timerElement.style.color = 'red';
+        else timerElement.style.color = '#d63031';
 
-        // ถ้าเวลาหมด (น้อยกว่าหรือเท่ากับ 0)
-        if (timeLeft <= 0) {
-            gameOver();
-        }
+        if (timeLeft <= 0) gameOver();
     }, 1000);
 }
 
-// ฟังก์ชันจบเกม
 function gameOver() {
-    // หยุดจับเวลา
     clearInterval(timerInterval);
 
-    // ซ่อนหน้าเกม
     document.getElementById('gameScreen').classList.remove('active');
-    // โชว์หน้าจบเกม
     document.getElementById('resultScreen').classList.add('active');
 
-    // จัดการเรื่องคะแนนสูงสุด
+    // แสดงเฉลยคำศัพท์ที่ตอบไม่ได้
+    var answerElement = document.getElementById('answerText');
+    answerElement.innerText = "เฉลย: " + currentWord;
+
     var oldHigh = localStorage.getItem('ww_highscore');
-    if (oldHigh == null) {
-        oldHigh = 0;
-    } else {
-        oldHigh = parseInt(oldHigh); // แปลงข้อความให้เป็นตัวเลข
-    }
+    if (oldHigh == null) oldHigh = 0;
+    else oldHigh = parseInt(oldHigh);
 
-    // ถ้าคะแนนใหม่ มากกว่า คะแนนเก่า
-    if (score > oldHigh) {
-        // บันทึกคะแนนใหม่
-        localStorage.setItem('ww_highscore', score);
-    }
+    if (score > oldHigh) localStorage.setItem('ww_highscore', score);
 
-    // แสดงคะแนนที่ได้
     document.getElementById('finalScore').innerText = score;
 
-    // เล่นเสียงตอนจบ
-    if (score > 0) {
-        winSound.play();
-    } else {
-        wrongSound.play();
-    }
+    if (score > 0) winSound.play();
+    else wrongSound.play();
 }
 
-// --- ส่วนที่ 5: เหตุการณ์ (Events) ---
-
-// เมื่อมีการพิมพ์ในช่อง ให้เรียกฟังก์ชันวาดคำ (เพื่อให้ตัวหนังสือขึ้นไปบนขีด _)
+// --- Events ---
 document.getElementById('guessInput').addEventListener('input', function() {
     drawWord();
 });
-
-// เมื่อกดปุ่ม Enter ในช่องพิมพ์ ให้ตรวจคำตอบ
 document.getElementById('guessInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        checkAnswer();
-    }
+    if (e.key === 'Enter') checkAnswer();
 });
 
-// เริ่มต้น: โหลดคะแนนสูงสุดมาโชว์
 var startScore = localStorage.getItem('ww_highscore');
-if (startScore == null) {
-    startScore = 0;
-}
+if (startScore == null) startScore = 0;
 document.getElementById('highScore').innerText = startScore;
 
-
-// --- ส่วนข้อมูล (Data) ---
-// ข้อมูลหมวดหมู่และคำศัพท์ (ผมแยกออกมาไว้ล่างสุดจะได้ไม่งง)
+// --- Data ---
 var CATEGORIES = {
   "Animals": {
     emoji: "🦁",
